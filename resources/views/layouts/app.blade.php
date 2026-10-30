@@ -4,11 +4,13 @@
         <meta charset="utf-8">
         <meta http-equiv="X-UA-Compatible" content="IE=edge">
         <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#003399">
         <meta name="csrf-token" content="{{ csrf_token() }}">
         <link rel="icon" href="{{ asset('favicon.ico') }}" type="image/x-icon">
         <title>@yield('title', 'Kabar Sahabat')</title>
         <meta property="og:site_name" content="Kabar Sahabat">
-        <link rel="alternate" type="application/rss+xml" title="Kabar Sahabat - RSS Feed" href="/feed.xml">
+        <meta property="og:locale" content="id_ID">
+        <link rel="alternate" type="application/rss+xml" title="Kabar Sahabat - RSS Feed" href="{{ url('/feed.xml') }}">
         @yield('canonical')
         @yield('meta')
         

@@ -21,3 +21,13 @@ if (! function_exists('media_disk')) {
         return Media::diskName();
     }
 }
+
+if (! function_exists('media_absolute_url')) {
+    /**
+     * URL absolut media untuk OG, JSON-LD, dan sitemap.
+     */
+    function media_absolute_url(?string $path): ?string
+    {
+        return Media::absoluteUrl($path);
+    }
+}

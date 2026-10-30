@@ -47,6 +47,24 @@ class Media
         return self::disk()->url($path);
     }
 
+    /**
+     * URL absolut untuk OG/Twitter/JSON-LD/sitemap (wajib skema + host).
+     */
+    public static function absoluteUrl(?string $path): ?string
+    {
+        $url = self::url($path);
+
+        if ($url === null) {
+            return null;
+        }
+
+        if (str_starts_with($url, 'http://') || str_starts_with($url, 'https://') || str_starts_with($url, '//')) {
+            return $url;
+        }
+
+        return rtrim((string) config('app.url'), '/').'/'.ltrim($url, '/');
+    }
+
     public static function exists(?string $path): bool
     {
         if (blank($path)) {

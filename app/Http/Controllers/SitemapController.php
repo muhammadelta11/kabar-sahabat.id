@@ -30,9 +30,10 @@ class SitemapController extends Controller
      */
     public function posts(): Response
     {
-        $posts = Post::where('status', 'Published')
-            ->where('published_at', '<=', now())
-            ->select(['slug', 'published_at', 'updated_at', 'image_url'])
+        $posts = Post::query()
+            ->published()
+            ->with(['categories:id,name'])
+            ->select(['id', 'slug', 'title', 'penulis', 'published_at', 'updated_at', 'image_url'])
             ->orderByDesc('published_at')
             ->get();
 

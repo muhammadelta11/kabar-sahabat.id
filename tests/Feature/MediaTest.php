@@ -14,6 +14,20 @@ it('membangun url media lokal dari path relatif', function () {
         ->toBe('https://cdn.example/x.jpg');
 });
 
+it('membangun url media absolut untuk OG dan sitemap', function () {
+    config([
+        'filesystems.media_disk' => 'public',
+        'app.url' => 'https://kabarsahabat.id',
+    ]);
+
+    expect(media_absolute_url('posts/foto.jpg'))
+        ->toBe('https://kabarsahabat.id/storage/posts/foto.jpg')
+        ->and(media_absolute_url('https://cdn.example/x.jpg'))
+        ->toBe('https://cdn.example/x.jpg')
+        ->and(media_absolute_url(null))
+        ->toBeNull();
+});
+
 it('menulis ulang src /storage di konten artikel', function () {
     config(['filesystems.media_disk' => 'public']);
 

@@ -20,10 +20,13 @@
     @foreach($post->categories as $cat)
         <meta property="article:section" content="{{ $cat->name }}">
     @endforeach
+    <meta property="og:locale" content="id_ID">
+    <meta property="article:modified_time" content="{{ $post->updated_at?->toIso8601String() }}">
     @if($post->image_url)
-        <meta property="og:image" content="{{ media_url($post->image_url) }}">
+        <meta property="og:image" content="{{ media_absolute_url($post->image_url) }}">
         <meta property="og:image:width" content="1200">
         <meta property="og:image:height" content="630">
+        <meta property="og:image:alt" content="{{ $post->image_caption ?? $post->title }}">
     @endif
     <!-- Twitter -->
     <meta name="twitter:card" content="summary_large_image">
@@ -31,8 +34,12 @@
     <meta name="twitter:title" content="{{ $post->title }}">
     <meta name="twitter:description" content="{{ Str::limit(Str::squish(html_entity_decode(strip_tags($post->excerpt ?? $post->content))), 160) }}">
     @if($post->image_url)
-        <meta name="twitter:image" content="{{ media_url($post->image_url) }}">
+        <meta name="twitter:image" content="{{ media_absolute_url($post->image_url) }}">
     @endif
+    @php
+        $publisherLogo = media_absolute_url($siteSettings->logo_path ?? null);
+        $articleSections = $post->categories->pluck('name')->values()->all();
+    @endphp
     <!-- JSON-LD: Article structured data (Google News / Rich Results) -->
     <script type="application/ld+json">
     {
@@ -41,10 +48,15 @@
         "headline": {{ Js::from($post->title) }},
         "description": {{ Js::from(Str::limit(Str::squish(html_entity_decode(strip_tags($post->excerpt ?? $post->content))), 160)) }},
         "url": {{ Js::from(route('news.show', $post->slug)) }},
+        "inLanguage": "id-ID",
+        "isAccessibleForFree": true,
+        @if($articleSections !== [])
+        "articleSection": {{ Js::from(count($articleSections) === 1 ? $articleSections[0] : $articleSections) }},
+        @endif
         @if($post->image_url)
         "image": {
             "@type": "ImageObject",
-            "url": {{ Js::from(media_url($post->image_url)) }},
+            "url": {{ Js::from(media_absolute_url($post->image_url)) }},
             "width": 1200,
             "height": 630
         },
@@ -56,9 +68,15 @@
             "name": {{ Js::from($post->penulis ?? $post->user->name ?? 'Redaksi') }}
         },
         "publisher": {
-            "@type": "Organization",
+            "@type": "NewsMediaOrganization",
             "name": "Kabar Sahabat",
             "url": {{ Js::from(url('/')) }}
+            @if($publisherLogo)
+            ,"logo": {
+                "@type": "ImageObject",
+                "url": {{ Js::from($publisherLogo) }}
+            }
+            @endif
         },
         "mainEntityOfPage": {
             "@type": "WebPage",
@@ -158,7 +176,7 @@
         <div class="max-w-[1080px] mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row items-center justify-between gap-4">
             <a href="/" class="flex items-center gap-3 group flex-shrink-0">
                 @if(isset($siteSettings) && $siteSettings->logo_path)
-                    <img src="{{ media_url($siteSettings->logo_path) }}" class="h-10 sm:h-14 w-auto max-w-[220px] sm:max-w-[300px] object-contain object-left" alt="Logo">
+                    <img src="{{ media_url($siteSettings->logo_path) }}" class="h-10 sm:h-14 w-auto max-w-[220px] sm:max-w-[300px] object-contain object-left" alt="Kabar Sahabat">
                 @else
                     <div class="w-9 h-9 sm:w-11 sm:h-11 bg-[#003399] flex items-center justify-center text-white font-black text-xl sm:text-2xl border-2 border-[#FFCC00]">K</div>
                     <div class="flex flex-col min-w-0">
@@ -190,7 +208,7 @@
             <div class="flex items-center justify-between h-11">
                 <a href="/" class="flex-shrink-0 items-center gap-1.5 mr-3 hidden" id="nav-sticky-logo">
                     @if(isset($siteSettings) && $siteSettings->logo_path)
-                        <img src="{{ media_url($siteSettings->logo_path) }}" class="h-9 w-auto max-w-[200px] object-contain object-left" alt="Logo">
+                        <img src="{{ media_url($siteSettings->logo_path) }}" class="h-9 w-auto max-w-[200px] object-contain object-left" alt="Kabar Sahabat">
                     @else
                         <div class="w-7 h-7 bg-white flex items-center justify-center font-black text-[#003399] text-sm border border-[#FFCC00]">K</div>
                         <span class="text-sm font-black text-white font-serif hidden sm:block">KABAR SAHABAT</span>

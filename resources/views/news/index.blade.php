@@ -1,16 +1,42 @@
 @extends('layouts.app')
 
-@section('title', request()->has('category') ? 'Kanal ' . ($navCategories->firstWhere('slug', request('category'))?->name ?? request('category')) . ' - Kabar Sahabat' : (request()->has('q') ? 'Pencarian: ' . request('q') . ' - Kabar Sahabat' : 'Kabar Sahabat - Portal Berita'))
+@php
+    $activeCategory = request()->filled('category')
+        ? ($navCategories->firstWhere('slug', request('category')) ?? null)
+        : null;
+    $isSearch = request()->filled('q');
+    $tagline = $siteSettings->tagline ?? 'Portal berita independen';
+    $pageTitle = $isSearch
+        ? 'Pencarian: '.request('q').' - Kabar Sahabat'
+        : ($activeCategory
+            ? 'Kanal '.$activeCategory->name.' - Kabar Sahabat'
+            : 'Kabar Sahabat - Portal Berita');
+    $pageDescription = $isSearch
+        ? 'Hasil pencarian berita untuk "'.request('q').'" di Kabar Sahabat.'
+        : ($activeCategory
+            ? 'Berita terkini kanal '.$activeCategory->name.' di Kabar Sahabat. '.$tagline
+            : 'Kabar Sahabat — '.$tagline.'. Portal berita independen yang menyajikan berita pergerakan, nasional, kaderisasi, opini, dan tokoh terkini.');
+    $canonicalUrl = $activeCategory
+        ? url('/?category='.$activeCategory->slug)
+        : url('/');
+    if ($posts->currentPage() > 1) {
+        $canonicalUrl .= (str_contains($canonicalUrl, '?') ? '&' : '?').'page='.$posts->currentPage();
+    }
+    $ogImage = isset($latestPosts) ? media_absolute_url($latestPosts->first()?->image_url) : null;
+    $orgLogo = media_absolute_url($siteSettings->logo_path ?? null);
+    $sameAs = collect([
+        $siteSettings->instagram_url ?? null,
+        $siteSettings->twitter_url ?? null,
+        $siteSettings->youtube_url ?? null,
+        $siteSettings->facebook_url ?? null,
+        $siteSettings->threads_url ?? null,
+        $siteSettings->tiktok_url ?? null,
+    ])->filter()->values()->all();
+@endphp
+
+@section('title', $pageTitle)
 
 @section('canonical')
-    @php
-        $canonicalUrl = request()->has('category')
-            ? url('/?category=' . request('category'))
-            : url('/');
-        if ($posts->currentPage() > 1) {
-            $canonicalUrl .= (str_contains($canonicalUrl, '?') ? '&' : '?') . 'page=' . $posts->currentPage();
-        }
-    @endphp
     <link rel="canonical" href="{{ $canonicalUrl }}">
     @if($posts->currentPage() > 1)
         <link rel="prev" href="{{ $posts->previousPageUrl() }}">
@@ -21,26 +47,26 @@
 @endsection
 
 @section('meta')
-    <meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1">
-    <meta name="description" content="Kabar Sahabat - Portal berita independen yang menyajikan berita pergerakan, nasional, kaderisasi, opini, dan tokoh terkini.">
-    <meta name="keywords" content="portal berita, pmii, pergerakan, kabar sahabat, nasional, kaderisasi, opini, tokoh">
+    <meta name="robots" content="{{ $isSearch ? 'noindex, follow' : 'index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1' }}">
+    <meta name="description" content="{{ $pageDescription }}">
     <!-- Open Graph / Facebook -->
     <meta property="og:type" content="website">
-    <meta property="og:url" content="{{ url('/') }}">
-    <meta property="og:title" content="Kabar Sahabat - Portal Berita">
-    <meta property="og:description" content="Kabar Sahabat - Portal berita independen yang menyajikan berita pergerakan, nasional, kaderisasi, opini, dan tokoh terkini.">
-    @if(isset($latestPosts) && $latestPosts->first()?->image_url)
-        <meta property="og:image" content="{{ media_url($latestPosts->first()->image_url) }}">
+    <meta property="og:url" content="{{ $canonicalUrl }}">
+    <meta property="og:title" content="{{ $pageTitle }}">
+    <meta property="og:description" content="{{ $pageDescription }}">
+    @if($ogImage)
+        <meta property="og:image" content="{{ $ogImage }}">
         <meta property="og:image:width" content="1200">
         <meta property="og:image:height" content="630">
+        <meta property="og:image:alt" content="{{ $pageTitle }}">
     @endif
     <!-- Twitter -->
     <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:url" content="{{ url('/') }}">
-    <meta name="twitter:title" content="Kabar Sahabat - Portal Berita">
-    <meta name="twitter:description" content="Kabar Sahabat - Portal berita independen yang menyajikan berita pergerakan, nasional, kaderisasi, opini, dan tokoh terkini.">
-    @if(isset($latestPosts) && $latestPosts->first()?->image_url)
-        <meta name="twitter:image" content="{{ media_url($latestPosts->first()->image_url) }}">
+    <meta name="twitter:url" content="{{ $canonicalUrl }}">
+    <meta name="twitter:title" content="{{ $pageTitle }}">
+    <meta name="twitter:description" content="{{ $pageDescription }}">
+    @if($ogImage)
+        <meta name="twitter:image" content="{{ $ogImage }}">
     @endif
     <!-- JSON-LD: WebSite + Sitelinks SearchAction -->
     <script type="application/ld+json">
@@ -49,6 +75,7 @@
         "@type": "WebSite",
         "name": "Kabar Sahabat",
         "url": {{ Js::from(url('/')) }},
+        "inLanguage": "id-ID",
         "potentialAction": {
             "@type": "SearchAction",
             "target": {
@@ -57,6 +84,25 @@
             },
             "query-input": "required name=search_term_string"
         }
+    }
+    </script>
+    <!-- JSON-LD: NewsMediaOrganization -->
+    <script type="application/ld+json">
+    {
+        "@@context": "https://schema.org",
+        "@type": "NewsMediaOrganization",
+        "name": "Kabar Sahabat",
+        "url": {{ Js::from(url('/')) }},
+        "description": {{ Js::from($tagline) }}
+        @if($orgLogo)
+        ,"logo": {
+            "@type": "ImageObject",
+            "url": {{ Js::from($orgLogo) }}
+        }
+        @endif
+        @if($sameAs !== [])
+        ,"sameAs": {{ Js::from($sameAs) }}
+        @endif
     }
     </script>
 @endsection
@@ -171,7 +217,7 @@
         <div class="max-w-[1080px] mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row items-center justify-between gap-4">
             <a href="/" class="flex items-center gap-3 group flex-shrink-0">
                 @if(isset($siteSettings) && $siteSettings->logo_path)
-                    <img src="{{ media_url($siteSettings->logo_path) }}" class="h-10 sm:h-14 w-auto max-w-[220px] sm:max-w-[300px] object-contain object-left" alt="Logo">
+                    <img src="{{ media_url($siteSettings->logo_path) }}" class="h-10 sm:h-14 w-auto max-w-[220px] sm:max-w-[300px] object-contain object-left" alt="Kabar Sahabat">
                 @else
                     <div class="w-9 h-9 sm:w-11 sm:h-11 bg-[#003399] flex items-center justify-center text-white font-black text-xl sm:text-2xl border-2 border-[#FFCC00]">K</div>
                     <div class="flex flex-col min-w-0">
@@ -203,7 +249,7 @@
             <div class="flex items-center justify-between h-11">
                 <a href="/" class="flex-shrink-0 items-center gap-1.5 mr-3 hidden" id="nav-sticky-logo">
                     @if(isset($siteSettings) && $siteSettings->logo_path)
-                        <img src="{{ media_url($siteSettings->logo_path) }}" class="h-9 w-auto max-w-[200px] object-contain object-left" alt="Logo">
+                        <img src="{{ media_url($siteSettings->logo_path) }}" class="h-9 w-auto max-w-[200px] object-contain object-left" alt="Kabar Sahabat">
                     @else
                         <div class="w-7 h-7 bg-white flex items-center justify-center font-black text-[#003399] text-sm border border-[#FFCC00]">K</div>
                         <span class="text-sm font-black text-white font-serif hidden sm:block">KABAR SAHABAT</span>
