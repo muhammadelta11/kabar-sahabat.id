@@ -602,7 +602,7 @@
     100% { transform: translateX(-50%); }
 }
 .animate-marquee-ticker {
-    animation: marquee-ticker 40s linear infinite;
+    animation: marquee-ticker 90s linear infinite;
     display: inline-flex;
 }
 .animate-marquee-ticker:hover { animation-play-state: paused; }
