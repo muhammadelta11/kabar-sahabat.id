@@ -2,115 +2,77 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Advertisement;
-use App\Models\Category;
 use App\Models\Post;
 use App\Models\PostView;
+use App\Support\NewsCache;
 use Illuminate\Http\Request;
 
 class NewsController extends Controller
 {
     public function index(Request $request)
     {
-        $query = Post::with('categories')
-            ->where('status', 'Published')
-            ->where('published_at', '<=', now())
-            ->orderBy('published_at', 'desc');
+        $query = Post::query()
+            ->with(['categories:id,name,slug', 'user:id,name'])
+            ->published()
+            ->latest('published_at');
 
-        if ($request->has('category')) {
+        if ($request->filled('category')) {
             $query->whereHas('categories', function ($q) use ($request) {
                 $q->where('slug', $request->category);
             });
         }
 
-        if ($request->has('q')) {
-            $query->where(function ($q) use ($request) {
-                $q->where('title', 'like', '%'.$request->q.'%')
-                    ->orWhere('content', 'like', '%'.$request->q.'%');
+        if ($request->filled('q')) {
+            $search = $request->string('q')->trim()->toString();
+
+            $query->where(function ($q) use ($search) {
+                $q->where('title', 'like', '%'.$search.'%')
+                    ->orWhere('excerpt', 'like', '%'.$search.'%');
             });
         }
 
         $posts = $query->paginate(15)->withQueryString();
 
-        $latestPosts = Post::with('categories')
-            ->where('status', 'Published')
-            ->where('published_at', '<=', now())
-            ->orderBy('published_at', 'desc')
-            ->limit(12)
-            ->get();
-
-        $trendingPosts = Post::with('categories')
-            ->where('status', 'Published')
-            ->where('published_at', '<=', now())
-            ->orderBy('views_count', 'desc')
-            ->limit(10)
-            ->get();
-
-        $popularPosts = Post::with('categories')
-            ->where('status', 'Published')
-            ->where('published_at', '<=', now())
-            ->orderBy('views_count', 'desc')
-            ->limit(7)
-            ->get();
-
-        // Seksi beranda: kategori yang dicentang "Tampilkan di Beranda" oleh admin
-        $homeSections = Category::query()
-            ->where('show_on_homepage', true)
-            ->orderBy('name')
-            ->get()
-            ->map(function (Category $category) {
-                $category->homepagePosts = $category->posts()
-                    ->where('status', 'Published')
-                    ->where('published_at', '<=', now())
-                    ->orderByDesc('published_at')
-                    ->limit(4)
-                    ->get();
-
-                return $category;
-            })
-            ->filter(fn (Category $category) => $category->homepagePosts->isNotEmpty())
-            ->values();
-
-        $ads = Advertisement::where('is_active', true)->get()->keyBy('slot_key');
-
-        return view('news.index', compact(
-            'posts',
-            'latestPosts',
-            'trendingPosts',
-            'popularPosts',
-            'homeSections',
-            'ads'
-        ));
+        return view('news.index', [
+            'posts' => $posts,
+            'latestPosts' => NewsCache::latestPosts(12),
+            'trendingPosts' => NewsCache::trendingPosts(10),
+            'popularPosts' => NewsCache::popularPosts(7),
+            'homeSections' => NewsCache::homeSections(),
+            'ads' => NewsCache::activeAds(),
+        ]);
     }
 
-    public function show($slug)
+    public function show(string $slug)
     {
-        $post = Post::with('categories', 'user')
+        $post = Post::query()
+            ->with(['categories:id,name,slug', 'user:id,name'])
             ->where('slug', $slug)
             ->where('status', 'Published')
             ->firstOrFail();
 
-        $post->increment('views_count');
-        PostView::create(['post_id' => $post->id, 'viewed_at' => now()]);
+        // Write ringan: 1 increment + 1 insert (diindeks). Untuk traffic sangat tinggi
+        // bisa diganti Redis counter + agregasi berkala.
+        Post::query()->whereKey($post->id)->increment('views_count');
+        PostView::query()->create([
+            'post_id' => $post->id,
+            'viewed_at' => now(),
+        ]);
 
-        // 1. Terpopuler (Sidebar)
-        $popularPosts = Post::with('categories')
+        $bacaJugaPosts = $post->relatedPosts()
+            ->with(['categories:id,name,slug'])
             ->where('status', 'Published')
-            ->where('published_at', '<=', now())
-            ->orderBy('views_count', 'desc')
-            ->limit(5)
+            ->limit(2)
             ->get();
-
-        // 2. Baca juga items (Prioritize admin-selected related posts)
-        $bacaJugaPosts = $post->relatedPosts()->where('status', 'Published')->limit(2)->get();
 
         if ($bacaJugaPosts->count() < 2) {
             $needed = 2 - $bacaJugaPosts->count();
-            $excludeIds = array_merge([$post->id], $bacaJugaPosts->pluck('id')->toArray());
+            $excludeIds = array_merge([$post->id], $bacaJugaPosts->pluck('id')->all());
 
-            $randomPosts = Post::with('categories')
+            $randomPosts = Post::query()
+                ->with(['categories:id,name,slug'])
+                ->published()
                 ->whereNotIn('id', $excludeIds)
-                ->where('status', 'Published')
                 ->inRandomOrder()
                 ->limit($needed)
                 ->get();
@@ -118,40 +80,38 @@ class NewsController extends Controller
             $bacaJugaPosts = $bacaJugaPosts->concat($randomPosts);
         }
 
-        // 3. Mungkin Anda Melewatkan Ini (4 posts)
-        $melewatkanPosts = Post::with('categories')
-            ->where('id', '!=', $post->id)
-            ->where('status', 'Published')
+        $melewatkanPosts = Post::query()
+            ->with(['categories:id,name,slug'])
+            ->published()
+            ->whereKeyNot($post->id)
             ->inRandomOrder()
             ->limit(4)
             ->get();
 
-        // 4. Berita Pilihan Untukmu (6 posts)
-        $pilihanPosts = Post::with('categories')
-            ->where('id', '!=', $post->id)
-            ->where('status', 'Published')
+        $pilihanPosts = Post::query()
+            ->with(['categories:id,name,slug'])
+            ->published()
+            ->whereKeyNot($post->id)
             ->inRandomOrder()
             ->limit(6)
             ->get();
 
-        // 5. Terkini Lainnya (Paginated, 10 per page)
-        $terkiniPosts = Post::with('categories')
-            ->where('id', '!=', $post->id)
-            ->where('status', 'Published')
-            ->orderBy('published_at', 'desc')
+        $terkiniPosts = Post::query()
+            ->with(['categories:id,name,slug', 'user:id,name'])
+            ->published()
+            ->whereKeyNot($post->id)
+            ->latest('published_at')
             ->paginate(10)
             ->withQueryString();
 
-        $ads = Advertisement::where('is_active', true)->get()->keyBy('slot_key');
-
-        return view('news.show', compact(
-            'post',
-            'popularPosts',
-            'bacaJugaPosts',
-            'melewatkanPosts',
-            'pilihanPosts',
-            'terkiniPosts',
-            'ads'
-        ));
+        return view('news.show', [
+            'post' => $post,
+            'popularPosts' => NewsCache::popularPosts(5, 'news.popular_posts_sidebar'),
+            'bacaJugaPosts' => $bacaJugaPosts,
+            'melewatkanPosts' => $melewatkanPosts,
+            'pilihanPosts' => $pilihanPosts,
+            'terkiniPosts' => $terkiniPosts,
+            'ads' => NewsCache::activeAds(),
+        ]);
     }
 }

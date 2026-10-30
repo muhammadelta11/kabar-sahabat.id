@@ -19,9 +19,10 @@ class PopularPostsTable extends BaseWidget
     {
         return $table
             ->query(
-                Post::query()->where('status', 'Published')
+                Post::query()->published()->limit(5)
             )
             ->defaultSort('views_count', 'desc')
+            ->paginated(false)
             ->columns([
                 Tables\Columns\TextColumn::make('title')
                     ->label('Judul Berita')

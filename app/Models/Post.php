@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Storage;
@@ -41,6 +42,16 @@ class Post extends Model
                 Storage::disk('public')->delete('kiriman/'.$filename);
             }
         });
+    }
+
+    /**
+     * Berita yang sudah terbit dan siap ditampilkan ke publik.
+     */
+    public function scopePublished(Builder $query): Builder
+    {
+        return $query
+            ->where('status', 'Published')
+            ->where('published_at', '<=', now());
     }
 
     public function user()

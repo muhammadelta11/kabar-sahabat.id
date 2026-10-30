@@ -9,6 +9,27 @@
     --font-serif: 'Plus Jakarta Sans', ui-serif, Georgia, Cambria, 'Times New Roman', Times, serif;
 }
 
+/* Cegah geser horizontal di HP */
+html,
+body {
+    overflow-x: hidden;
+    max-width: 100%;
+}
+
+[x-cloak] {
+    display: none !important;
+}
+
+/* Scroll horizontal (kanal/trending) terasa native di HP */
+.scrollbar-none {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
+}
+.scrollbar-none::-webkit-scrollbar {
+    display: none;
+}
+
 /* Caption foto: gambar utama & gambar di dalam artikel */
 figure > figcaption,
 #article-content figcaption {
@@ -25,4 +46,29 @@ figure > figcaption,
 
 #article-content .attachment {
     max-width: 100%;
+}
+
+/* Konten artikel: media tidak boleh melebihi layar HP */
+#article-content img,
+#article-content iframe,
+#article-content video,
+#article-content table,
+#article-content pre {
+    max-width: 100% !important;
+    height: auto;
+}
+
+#article-content iframe {
+    width: 100% !important;
+}
+
+#article-content table {
+    display: block;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+}
+
+#article-content pre {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
 }

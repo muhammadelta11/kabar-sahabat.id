@@ -66,14 +66,13 @@
      KOMPAS.COM ~90% MATCH PORTAL BERITA — PMII WALISONGO
      ============================================================ -->
 
-<div class="bg-[#F8F9FA] min-h-screen text-neutral-900 font-sans antialiased" id="pmii-news-wrap">
+<div class="bg-[#F8F9FA] min-h-screen text-neutral-900 font-sans antialiased overflow-x-hidden w-full" id="pmii-news-wrap">
 
-    <!-- SKIN AD: KIRI & KANAN (Wallpaper Ad ala Kompas.com) -->
-    <div class="fixed inset-0 pointer-events-none z-[200]" style="top: 120px;" id="skin-ads-overlay">
+    <!-- SKIN AD: KIRI & KANAN (hanya desktop lebar, default hidden agar tidak geser HP) -->
+    <div class="fixed inset-0 pointer-events-none z-[200] hidden lg:block overflow-hidden" style="top: 120px;" id="skin-ads-overlay">
         <div style="position: relative; max-width: 1080px; margin: 0 auto; height: 100%;">
-            <!-- Kiri -->
             @if(isset($ads['skin_ad_left']))
-            <div style="position: absolute; right: 100%; top: 0; padding-right: 8px; pointer-events: auto;" id="skin-ad-left">
+            <div class="hidden" style="position: absolute; right: 100%; top: 0; padding-right: 8px; pointer-events: auto;" id="skin-ad-left">
                 <div class="w-[160px] h-[600px] relative overflow-hidden bg-neutral-200">
                     @if($ads['skin_ad_left']->type === 'image')
                         <a href="{{ $ads['skin_ad_left']->link_url }}" target="_blank" class="block w-full h-full">
@@ -85,9 +84,8 @@
                 </div>
             </div>
             @endif
-            <!-- Kanan -->
             @if(isset($ads['skin_ad_right']))
-            <div style="position: absolute; left: 100%; top: 0; padding-left: 8px; pointer-events: auto;" id="skin-ad-right">
+            <div class="hidden" style="position: absolute; left: 100%; top: 0; padding-left: 8px; pointer-events: auto;" id="skin-ad-right">
                 <div class="w-[160px] h-[600px] relative overflow-hidden bg-neutral-200">
                     @if($ads['skin_ad_right']->type === 'image')
                         <a href="{{ $ads['skin_ad_right']->link_url }}" target="_blank" class="block w-full h-full">
@@ -173,20 +171,20 @@
         <div class="max-w-[1080px] mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row items-center justify-between gap-4">
             <a href="/" class="flex items-center gap-3 group flex-shrink-0">
                 @if(isset($siteSettings) && $siteSettings->logo_path)
-                    <img src="{{ asset('storage/' . $siteSettings->logo_path) }}" class="h-14 w-auto max-w-[300px] object-contain object-left" alt="Logo">
+                    <img src="{{ asset('storage/' . $siteSettings->logo_path) }}" class="h-10 sm:h-14 w-auto max-w-[220px] sm:max-w-[300px] object-contain object-left" alt="Logo">
                 @else
-                    <div class="w-11 h-11 bg-[#003399] flex items-center justify-center text-white font-black text-2xl border-2 border-[#FFCC00]">K</div>
-                    <div class="flex flex-col">
+                    <div class="w-9 h-9 sm:w-11 sm:h-11 bg-[#003399] flex items-center justify-center text-white font-black text-xl sm:text-2xl border-2 border-[#FFCC00]">K</div>
+                    <div class="flex flex-col min-w-0">
                         <div class="flex items-center gap-1 leading-none">
-                            <span class="text-3xl font-black tracking-tighter text-[#003399] font-serif">KABAR</span>
-                            <span class="text-3xl font-black tracking-tighter text-[#FFCC00] font-serif">SAHABAT</span>
+                            <span class="text-2xl sm:text-3xl font-black tracking-tighter text-[#003399] font-serif">KABAR</span>
+                            <span class="text-2xl sm:text-3xl font-black tracking-tighter text-[#FFCC00] font-serif">SAHABAT</span>
                         </div>
-                        <span class="text-[9px] text-neutral-500 font-bold uppercase tracking-widest mt-1">{{ $siteSettings->tagline ?? 'Jernih Melihat Pergerakan' }}</span>
+                        <span class="text-[8px] sm:text-[9px] text-neutral-500 font-bold uppercase tracking-widest mt-1 truncate">{{ $siteSettings->tagline ?? 'Jernih Melihat Pergerakan' }}</span>
                     </div>
                 @endif
             </a>
             @if(isset($ads['header_leaderboard']))
-            <div class="w-full md:w-[728px] h-[90px] relative flex-shrink-0 flex items-center justify-center overflow-hidden border border-neutral-200">
+            <div class="w-full max-w-full md:max-w-[728px] h-[50px] sm:h-[90px] relative flex-shrink-0 flex items-center justify-center overflow-hidden border border-neutral-200">
                 @if($ads['header_leaderboard']->type === 'image')
                     <a href="{{ $ads['header_leaderboard']->link_url }}" target="_blank" class="block w-full h-full">
                         <img src="{{ asset('storage/' . $ads['header_leaderboard']->image_url) }}" class="w-full h-full object-cover" alt="{{ $ads['header_leaderboard']->name }}">
@@ -305,15 +303,15 @@
     </div>
 
     <!-- 7. MAIN BODY -->
-    <main class="max-w-[1080px] mx-auto px-4 sm:px-6 lg:px-8 py-5 space-y-6">
+    <main class="max-w-[1080px] mx-auto px-3 sm:px-6 lg:px-8 py-4 sm:py-5 space-y-5 sm:space-y-6 w-full min-w-0">
 
         <!-- === HEADLINE GRID === -->
-        <section class="bg-white p-4 border border-neutral-200 shadow-sm rounded-lg space-y-4">
-            <div class="flex items-center justify-between border-b-2 border-[#003399] pb-2">
-                <h2 class="text-sm font-black uppercase tracking-tight text-[#003399] flex items-center gap-2">
-                    <span class="w-2.5 h-4 bg-[#FFCC00] inline-block"></span>HEADLINE UTAMA
+        <section class="bg-white p-3 sm:p-4 border border-neutral-200 shadow-sm rounded-lg space-y-4">
+            <div class="flex items-center justify-between gap-2 border-b-2 border-[#003399] pb-2">
+                <h2 class="text-sm font-black uppercase tracking-tight text-[#003399] flex items-center gap-2 min-w-0">
+                    <span class="w-2.5 h-4 bg-[#FFCC00] inline-block flex-shrink-0"></span>HEADLINE UTAMA
                 </h2>
-                <span class="text-[10px] text-neutral-400 font-medium">Kabar Terkini Hari Ini</span>
+                <span class="text-[10px] text-neutral-400 font-medium hidden sm:inline flex-shrink-0">Kabar Terkini Hari Ini</span>
             </div>
 
             <div class="grid grid-cols-1 lg:grid-cols-12 gap-4">
@@ -323,7 +321,7 @@
                         <a href="{{ route('news.show', $headline->slug) }}" class="block space-y-3">
                             <div class="relative aspect-[16/9] overflow-hidden bg-neutral-900 border border-neutral-200">
                                 @if($headline->image_url)
-                                    <img src="{{ asset('storage/' . $headline->image_url) }}" alt="{{ $headline->title }}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
+                                    <x-post-image :src="$headline->image_url" :alt="$headline->title" :priority="true" class="group-hover:scale-105 transition-transform duration-500" />
                                 @else
                                     <div class="w-full h-full bg-neutral-800 flex items-center justify-center text-white/30 text-2xl font-black font-serif">KABAR SAHABAT</div>
                                 @endif
@@ -336,7 +334,7 @@
                                     <span class="bg-[#003399] text-white px-2 py-0.5 text-[10px] font-bold uppercase border-l-2 border-[#FFCC00] lg:hidden">{{ optional($headline->categories->first())->name ?? 'Nasional' }}</span>
                                     <span>{{ $headline->published_at->translatedFormat('l, d F Y | H:i') }} WIB</span>
                                 </div>
-                                <h1 class="text-xl sm:text-2xl lg:text-[26px] font-black font-text-neutral-950 leading-tight group-hover:text-[#003399] transition-colors font-serif">{{ $headline->title }}</h1>
+                                <h1 class="text-lg sm:text-2xl lg:text-[26px] font-black text-neutral-950 leading-snug sm:leading-tight group-hover:text-[#003399] transition-colors font-serif">{{ $headline->title }}</h1>
                                 <p class="text-sm text-neutral-600 leading-relaxed line-clamp-2">{{ Str::limit(Str::squish(html_entity_decode(strip_tags($headline->content))), 200) }}</p>
                             </div>
                         </a>
@@ -392,9 +390,10 @@
 
             <!-- MAIN FEED -->
             <div class="lg:col-span-8">
-                <div class="bg-white px-4 py-3 border border-neutral-200 border-b-2 border-b-[#003399] flex items-center justify-between">
-                    <h2 class="text-sm font-black uppercase tracking-tight text-neutral-950 flex items-center gap-2">
-                        <span class="w-2 h-4 bg-[#003399] inline-block"></span>
+                <div class="bg-white px-3 sm:px-4 py-3 border border-neutral-200 border-b-2 border-b-[#003399] flex items-center justify-between gap-2">
+                    <h2 class="text-sm font-black uppercase tracking-tight text-neutral-950 flex items-center gap-2 min-w-0">
+                        <span class="w-2 h-4 bg-[#003399] inline-block flex-shrink-0"></span>
+                        <span class="truncate">
                         @if(request()->has('category'))
                             KANAL: {{ strtoupper($navCategories->firstWhere('slug', request('category'))?->name ?? request('category')) }}
                         @elseif(request()->has('q'))
@@ -402,30 +401,27 @@
                         @else
                             BERITA TERKINI
                         @endif
+                        </span>
                     </h2>
-                    <span class="text-[10px] text-neutral-400 font-medium">Diurutkan Berdasarkan Waktu</span>
+                    <span class="text-[10px] text-neutral-400 font-medium hidden sm:inline flex-shrink-0">Diurutkan Berdasarkan Waktu</span>
                 </div>
 
                 <div class="divide-y divide-neutral-200 border border-neutral-200 border-t-0 bg-white">
                     @foreach($posts as $index => $p)
-                        <article class="px-4 py-4 hover:bg-neutral-50 transition-colors group">
-                            <a href="{{ route('news.show', $p->slug) }}" class="flex flex-row items-start gap-3">
-                                <div class="w-[120px] sm:w-44 h-[85px] sm:h-[110px] bg-neutral-200 flex-shrink-0 overflow-hidden border border-neutral-200 relative">
-                                    @if($p->image_url)
-                                        <img src="{{ asset('storage/' . $p->image_url) }}" alt="{{ $p->title }}" loading="lazy" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
-                                    @else
-                                        <div class="w-full h-full bg-neutral-300 flex items-center justify-center text-neutral-500 text-xs font-bold">KABAR</div>
-                                    @endif
+                        <article class="px-3 sm:px-4 py-3.5 sm:py-4 hover:bg-neutral-50 transition-colors group">
+                            <a href="{{ route('news.show', $p->slug) }}" class="flex flex-row items-start gap-2.5 sm:gap-3">
+                                <div class="w-[100px] sm:w-44 h-[72px] sm:h-[110px] bg-neutral-200 flex-shrink-0 overflow-hidden border border-neutral-200 relative rounded-sm">
+                                    <x-post-image :src="$p->image_url" :alt="$p->title" class="group-hover:scale-105 transition-transform duration-500" />
                                 </div>
-                                <div class="space-y-1.5 flex-1 min-w-0">
+                                <div class="space-y-1 sm:space-y-1.5 flex-1 min-w-0">
                                     <div class="flex flex-wrap items-center gap-x-1.5 gap-y-0.5 text-[10px] sm:text-[11px] text-neutral-400">
                                         <span class="font-bold uppercase tracking-wider text-[#003399]">{{ optional($p->categories->firstWhere('slug', request('category')) ?? $p->categories->first())->name ?? 'Nasional' }}</span>
-                                        <span class="h-3 w-px bg-neutral-300"></span>
-                                        <span class="font-semibold text-[#CC0000]">{{ $p->user->name ?? 'Redaksi' }}</span>
+                                        <span class="h-3 w-px bg-neutral-300 hidden xs:inline sm:inline"></span>
+                                        <span class="font-semibold text-[#CC0000] truncate max-w-[40%]">{{ $p->user->name ?? 'Redaksi' }}</span>
                                         <span>•</span>
-                                        <span>{{ $p->published_at->translatedFormat('l, d M Y | H:i') }} WIB</span>
+                                        <span class="truncate">{{ $p->published_at->translatedFormat('d M Y, H:i') }} WIB</span>
                                     </div>
-                                    <h3 class="text-xs sm:text-base font-bold text-neutral-950 leading-snug group-hover:text-[#003399] transition-colors line-clamp-3 font-serif">{{ $p->title }}</h3>
+                                    <h3 class="text-[13px] sm:text-base font-bold text-neutral-950 leading-snug group-hover:text-[#003399] transition-colors line-clamp-3 font-serif">{{ $p->title }}</h3>
                                     <p class="text-[11px] sm:text-xs text-neutral-600 leading-relaxed line-clamp-2 hidden sm:block">{{ Str::limit(Str::squish(html_entity_decode(strip_tags($p->content))), 150) }}</p>
                                 </div>
                             </a>
@@ -456,16 +452,16 @@
                     @endforeach
 
                     @if ($posts->hasPages())
-                        <div class="flex items-center justify-between px-4 py-3 border border-neutral-200 border-t-0 text-xs bg-white rounded-b-lg">
-                            <span class="text-neutral-500 font-medium">Halaman {{ $posts->currentPage() }} dari {{ $posts->lastPage() }}</span>
-                            <div class="flex items-center gap-1.5">
+                        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 px-3 sm:px-4 py-3 border border-neutral-200 border-t-0 text-xs bg-white rounded-b-lg">
+                            <span class="text-neutral-500 font-medium text-center sm:text-left">Halaman {{ $posts->currentPage() }} dari {{ $posts->lastPage() }}</span>
+                            <div class="flex items-center justify-center gap-1.5 overflow-x-auto max-w-full scrollbar-none">
                                 @if ($posts->onFirstPage())
-                                    <button disabled class="px-3 py-1.5 border border-neutral-200 font-bold text-neutral-300 cursor-not-allowed rounded">← Sebelumnya</button>
+                                    <button disabled class="px-2.5 sm:px-3 py-1.5 border border-neutral-200 font-bold text-neutral-300 cursor-not-allowed rounded whitespace-nowrap">←</button>
                                 @else
-                                    <a href="{{ $posts->previousPageUrl() }}" class="px-3 py-1.5 border border-neutral-300 font-bold text-neutral-700 hover:bg-[#003399] hover:text-white hover:border-[#003399] transition-colors rounded">← Sebelumnya</a>
+                                    <a href="{{ $posts->previousPageUrl() }}" class="px-2.5 sm:px-3 py-1.5 border border-neutral-300 font-bold text-neutral-700 hover:bg-[#003399] hover:text-white hover:border-[#003399] transition-colors rounded whitespace-nowrap">←</a>
                                 @endif
 
-                                @foreach ($posts->getUrlRange(max(1, $posts->currentPage() - 2), min($posts->lastPage(), $posts->currentPage() + 2)) as $page => $url)
+                                @foreach ($posts->getUrlRange(max(1, $posts->currentPage() - 1), min($posts->lastPage(), $posts->currentPage() + 1)) as $page => $url)
                                     @if ($page == $posts->currentPage())
                                         <span class="px-3 py-1.5 bg-[#003399] text-white font-bold border border-[#003399] rounded">{{ $page }}</span>
                                     @else
@@ -474,9 +470,9 @@
                                 @endforeach
 
                                 @if ($posts->hasMorePages())
-                                    <a href="{{ $posts->nextPageUrl() }}" class="px-3 py-1.5 border border-neutral-300 font-bold text-neutral-700 hover:bg-[#003399] hover:text-white hover:border-[#003399] transition-colors rounded">Berikutnya →</a>
+                                    <a href="{{ $posts->nextPageUrl() }}" class="px-2.5 sm:px-3 py-1.5 border border-neutral-300 font-bold text-neutral-700 hover:bg-[#003399] hover:text-white hover:border-[#003399] transition-colors rounded whitespace-nowrap">→</a>
                                 @else
-                                    <button disabled class="px-3 py-1.5 border border-neutral-200 font-bold text-neutral-300 cursor-not-allowed rounded">Berikutnya →</button>
+                                    <button disabled class="px-2.5 sm:px-3 py-1.5 border border-neutral-200 font-bold text-neutral-300 cursor-not-allowed rounded whitespace-nowrap">→</button>
                                 @endif
                             </div>
                         </div>
@@ -571,7 +567,7 @@
                         <div class="space-y-0.5">
                             <span class="text-[9px] font-bold uppercase tracking-wider text-[#003399] block">{{ optional($hp->categories->first())->name }}</span>
                             <a href="{{ route('news.show', $hp->slug) }}" class="text-xs font-bold text-neutral-950 leading-snug group-hover:text-[#003399] line-clamp-2 font-serif block">{{ $hp->title }}</a>
-                            <span class="text-[10px] text-neutral-400 block">{{ $hp->published_at->translatedFormat('l, d M Y | H:i') }} WIB</span>
+                            <span class="text-[10px] text-neutral-400 block">{{ $hp->published_at?->translatedFormat('l, d M Y | H:i') }} WIB</span>
                         </div>
                     </article>
                 @endforeach

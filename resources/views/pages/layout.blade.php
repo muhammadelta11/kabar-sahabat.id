@@ -26,7 +26,7 @@
         'pages.pedoman-media-siber' => 'Pedoman Media Siber',
     ];
 @endphp
-<div class="bg-[#F8F9FA] min-h-screen text-neutral-900 font-sans antialiased">
+<div class="bg-[#F8F9FA] min-h-screen text-neutral-900 font-sans antialiased overflow-x-hidden w-full">
 
     <!-- TOP BAR -->
     <div class="bg-neutral-900 text-white text-[11px] border-b border-neutral-800">
@@ -60,7 +60,7 @@
         <div class="max-w-[1080px] mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex items-center justify-between h-11">
                 <div class="relative flex-1 min-w-0 h-full">
-                    <div class="flex items-center overflow-x-auto h-full pr-6" style="scrollbar-width:none;">
+                    <div class="flex items-center overflow-x-auto h-full pr-6 scrollbar-none" style="scrollbar-width:none;">
                         <a href="/" class="h-full flex items-center px-4 text-[11px] font-bold uppercase tracking-wider text-white/90 hover:text-white hover:bg-[#002b80] transition-colors whitespace-nowrap">Beranda</a>
                         @foreach($navCategories as $navCategory)
                         <a href="/?category={{ $navCategory->slug }}" class="h-full flex items-center px-4 text-[11px] font-bold uppercase tracking-wider text-white/90 hover:text-white hover:bg-[#002b80] transition-colors whitespace-nowrap">{{ $navCategory->name }}</a>

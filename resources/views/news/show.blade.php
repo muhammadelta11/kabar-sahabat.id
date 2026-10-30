@@ -108,14 +108,13 @@
      KOMPAS.COM ~90% MATCH PORTAL BERITA — PMII WALISONGO
      ============================================================ -->
 
-<div class="bg-[#F8F9FA] min-h-screen text-neutral-900 font-sans antialiased" id="pmii-news-wrap">
+<div class="bg-[#F8F9FA] min-h-screen text-neutral-900 font-sans antialiased overflow-x-hidden w-full" id="pmii-news-wrap">
 
-    <!-- SKIN AD: KIRI & KANAN (Wallpaper Ad ala Kompas.com) -->
-    <div class="fixed inset-0 pointer-events-none z-[200]" style="top: 120px;" id="skin-ads-overlay">
+    <!-- SKIN AD: hanya desktop lebar; default hidden agar tidak geser HP -->
+    <div class="fixed inset-0 pointer-events-none z-[200] hidden lg:block overflow-hidden" style="top: 120px;" id="skin-ads-overlay">
         <div style="position: relative; max-width: 1080px; margin: 0 auto; height: 100%;">
-            <!-- Kiri -->
             @if(isset($ads['skin_ad_left']))
-            <div style="position: absolute; right: 100%; top: 0; padding-right: 8px; pointer-events: auto;" id="skin-ad-left">
+            <div class="hidden" style="position: absolute; right: 100%; top: 0; padding-right: 8px; pointer-events: auto;" id="skin-ad-left">
                 <div class="w-[160px] h-[600px] relative overflow-hidden bg-neutral-200">
                     @if($ads['skin_ad_left']->type === 'image')
                         <a href="{{ $ads['skin_ad_left']->link_url }}" target="_blank" class="block w-full h-full">
@@ -127,9 +126,8 @@
                 </div>
             </div>
             @endif
-            <!-- Kanan -->
             @if(isset($ads['skin_ad_right']))
-            <div style="position: absolute; left: 100%; top: 0; padding-left: 8px; pointer-events: auto;" id="skin-ad-right">
+            <div class="hidden" style="position: absolute; left: 100%; top: 0; padding-left: 8px; pointer-events: auto;" id="skin-ad-right">
                 <div class="w-[160px] h-[600px] relative overflow-hidden bg-neutral-200">
                     @if($ads['skin_ad_right']->type === 'image')
                         <a href="{{ $ads['skin_ad_right']->link_url }}" target="_blank" class="block w-full h-full">
@@ -160,20 +158,20 @@
         <div class="max-w-[1080px] mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row items-center justify-between gap-4">
             <a href="/" class="flex items-center gap-3 group flex-shrink-0">
                 @if(isset($siteSettings) && $siteSettings->logo_path)
-                    <img src="{{ asset('storage/' . $siteSettings->logo_path) }}" class="h-14 w-auto max-w-[300px] object-contain object-left" alt="Logo">
+                    <img src="{{ asset('storage/' . $siteSettings->logo_path) }}" class="h-10 sm:h-14 w-auto max-w-[220px] sm:max-w-[300px] object-contain object-left" alt="Logo">
                 @else
-                    <div class="w-11 h-11 bg-[#003399] flex items-center justify-center text-white font-black text-2xl border-2 border-[#FFCC00]">K</div>
-                    <div class="flex flex-col">
+                    <div class="w-9 h-9 sm:w-11 sm:h-11 bg-[#003399] flex items-center justify-center text-white font-black text-xl sm:text-2xl border-2 border-[#FFCC00]">K</div>
+                    <div class="flex flex-col min-w-0">
                         <div class="flex items-center gap-1 leading-none">
-                            <span class="text-3xl font-black tracking-tighter text-[#003399] font-serif">KABAR</span>
-                            <span class="text-3xl font-black tracking-tighter text-[#FFCC00] font-serif">SAHABAT</span>
+                            <span class="text-2xl sm:text-3xl font-black tracking-tighter text-[#003399] font-serif">KABAR</span>
+                            <span class="text-2xl sm:text-3xl font-black tracking-tighter text-[#FFCC00] font-serif">SAHABAT</span>
                         </div>
-                        <span class="text-[9px] text-neutral-500 font-bold uppercase tracking-widest mt-1">{{ $siteSettings->tagline ?? 'Jernih Melihat Pergerakan' }}</span>
+                        <span class="text-[8px] sm:text-[9px] text-neutral-500 font-bold uppercase tracking-widest mt-1 truncate">{{ $siteSettings->tagline ?? 'Jernih Melihat Pergerakan' }}</span>
                     </div>
                 @endif
             </a>
             @if(isset($ads['header_leaderboard']))
-            <div class="w-full md:w-[728px] h-[90px] relative flex-shrink-0 flex items-center justify-center overflow-hidden border border-neutral-200">
+            <div class="w-full max-w-full md:max-w-[728px] h-[50px] sm:h-[90px] relative flex-shrink-0 flex items-center justify-center overflow-hidden border border-neutral-200">
                 @if($ads['header_leaderboard']->type === 'image')
                     <a href="{{ $ads['header_leaderboard']->link_url }}" target="_blank" class="block w-full h-full">
                         <img src="{{ asset('storage/' . $ads['header_leaderboard']->image_url) }}" class="w-full h-full object-cover" alt="{{ $ads['header_leaderboard']->name }}">
@@ -223,7 +221,7 @@
     </nav>
 
     <!-- MAIN CONTENT -->
-    <main class="max-w-[1080px] mx-auto px-4 sm:px-6 lg:px-8 py-6 relative z-10 bg-white">
+    <main class="max-w-[1080px] mx-auto px-3 sm:px-6 lg:px-8 py-4 sm:py-6 relative z-10 bg-white w-full min-w-0 overflow-x-hidden">
         
         <!-- Breadcrumb -->
         <nav class="text-[11px] font-semibold text-neutral-500 mb-4 flex items-center gap-2 uppercase tracking-wide">
@@ -240,12 +238,12 @@
             
             <!-- Left Column: Article Content -->
             <article class="flex-1 lg:max-w-[70%]">
-                <h1 class="text-3xl sm:text-4xl font-black font-serif text-neutral-900 leading-tight mb-4">
+                <h1 class="text-[1.4rem] sm:text-3xl lg:text-4xl font-black font-serif text-neutral-900 leading-snug sm:leading-tight mb-3 sm:mb-4">
                     {{ $post->title }}
                 </h1>
                 
-                <div class="flex items-center justify-between border-b border-neutral-200 pb-4 mb-5">
-                    <div class="flex flex-col">
+                <div class="flex items-start justify-between gap-3 border-b border-neutral-200 pb-4 mb-5">
+                    <div class="flex flex-col min-w-0">
                         <span class="text-xs font-bold text-[#003399]">Penulis: {{ $post->user->name ?? "Tim Redaksi" }}</span>
                         <span class="text-[11px] text-neutral-500">{{ $post->published_at?->translatedFormat('l, d F Y | H:i') }} WIB</span>
                     </div>
@@ -270,7 +268,7 @@
                 <!-- Featured Image -->
                 @if($post->image_url)
                 <figure class="mb-6 relative">
-                    <img src="{{ asset('storage/' . $post->image_url) }}" alt="{{ $post->image_caption ?? $post->title }}" class="w-full h-auto object-cover max-h-[500px]">
+                    <x-post-image :src="$post->image_url" :alt="$post->image_caption ?? $post->title" :priority="true" class="w-full h-auto object-cover max-h-[500px]" />
                     @if($post->image_caption)
                     <figcaption>{{ $post->image_caption }}</figcaption>
                     @endif
@@ -340,7 +338,7 @@
             <!-- Right Column: Sidebar -->
             <aside class="w-full lg:w-[320px] flex-shrink-0">
                 @if(isset($ads['sidebar_mrec']))
-                <div class="w-[300px] h-[250px] mx-auto relative flex items-center justify-center overflow-hidden border border-neutral-200 bg-white rounded-lg mb-8">
+                <div class="w-full max-w-[300px] h-[250px] mx-auto relative flex items-center justify-center overflow-hidden border border-neutral-200 bg-white rounded-lg mb-8">
                     @if($ads['sidebar_mrec']->type === 'image')
                         <a href="{{ $ads['sidebar_mrec']->link_url }}" target="_blank" class="block w-full h-full">
                             <img src="{{ asset('storage/' . $ads['sidebar_mrec']->image_url) }}" class="w-full h-full object-cover" alt="{{ $ads['sidebar_mrec']->name }}">
@@ -371,7 +369,7 @@
                 </div>
 
                 @if(isset($ads['sidebar_skyscraper']))
-                <div class="w-[300px] h-[600px] mx-auto relative flex items-center justify-center overflow-hidden border border-neutral-200 bg-white rounded-lg sticky top-24">
+                <div class="w-full max-w-[300px] h-[600px] mx-auto relative flex items-center justify-center overflow-hidden border border-neutral-200 bg-white rounded-lg sticky top-24">
                     @if($ads['sidebar_skyscraper']->type === 'image')
                         <a href="{{ $ads['sidebar_skyscraper']->link_url }}" target="_blank" class="block w-full h-full">
                             <img src="{{ asset('storage/' . $ads['sidebar_skyscraper']->image_url) }}" class="w-full h-full object-cover" alt="{{ $ads['sidebar_skyscraper']->name }}">
@@ -446,16 +444,16 @@
                 @endforeach
 
                 @if ($terkiniPosts->hasPages())
-                    <div class="flex items-center justify-between px-4 py-3 border-t border-neutral-200 text-xs bg-white">
-                        <span class="text-neutral-500 font-medium">Halaman {{ $terkiniPosts->currentPage() }} dari {{ $terkiniPosts->lastPage() }}</span>
-                        <div class="flex items-center gap-1.5">
+                    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 px-3 sm:px-4 py-3 border-t border-neutral-200 text-xs bg-white">
+                        <span class="text-neutral-500 font-medium text-center sm:text-left">Halaman {{ $terkiniPosts->currentPage() }} dari {{ $terkiniPosts->lastPage() }}</span>
+                        <div class="flex items-center justify-center gap-1.5 overflow-x-auto max-w-full scrollbar-none">
                             @if ($terkiniPosts->onFirstPage())
-                                <button disabled class="px-3 py-1.5 border border-neutral-200 font-bold text-neutral-300 cursor-not-allowed rounded">← Sebelumnya</button>
+                                <button disabled class="px-2.5 sm:px-3 py-1.5 border border-neutral-200 font-bold text-neutral-300 cursor-not-allowed rounded whitespace-nowrap">←</button>
                             @else
-                                <a href="{{ $terkiniPosts->previousPageUrl() }}" class="px-3 py-1.5 border border-neutral-300 font-bold text-neutral-700 hover:bg-[#003399] hover:text-white hover:border-[#003399] transition-colors rounded">← Sebelumnya</a>
+                                <a href="{{ $terkiniPosts->previousPageUrl() }}" class="px-2.5 sm:px-3 py-1.5 border border-neutral-300 font-bold text-neutral-700 hover:bg-[#003399] hover:text-white hover:border-[#003399] transition-colors rounded whitespace-nowrap">←</a>
                             @endif
 
-                            @foreach ($terkiniPosts->getUrlRange(max(1, $terkiniPosts->currentPage() - 2), min($terkiniPosts->lastPage(), $terkiniPosts->currentPage() + 2)) as $page => $url)
+                            @foreach ($terkiniPosts->getUrlRange(max(1, $terkiniPosts->currentPage() - 1), min($terkiniPosts->lastPage(), $terkiniPosts->currentPage() + 1)) as $page => $url)
                                 @if ($page == $terkiniPosts->currentPage())
                                     <span class="px-3 py-1.5 bg-[#003399] text-white font-bold border border-[#003399] rounded">{{ $page }}</span>
                                 @else
@@ -464,9 +462,9 @@
                             @endforeach
 
                             @if ($terkiniPosts->hasMorePages())
-                                <a href="{{ $terkiniPosts->nextPageUrl() }}" class="px-3 py-1.5 border border-neutral-300 font-bold text-neutral-700 hover:bg-[#003399] hover:text-white hover:border-[#003399] transition-colors rounded">Berikutnya →</a>
+                                <a href="{{ $terkiniPosts->nextPageUrl() }}" class="px-2.5 sm:px-3 py-1.5 border border-neutral-300 font-bold text-neutral-700 hover:bg-[#003399] hover:text-white hover:border-[#003399] transition-colors rounded whitespace-nowrap">→</a>
                             @else
-                                <button disabled class="px-3 py-1.5 border border-neutral-200 font-bold text-neutral-300 cursor-not-allowed rounded">Berikutnya →</button>
+                                <button disabled class="px-2.5 sm:px-3 py-1.5 border border-neutral-200 font-bold text-neutral-300 cursor-not-allowed rounded whitespace-nowrap">→</button>
                             @endif
                         </div>
                     </div>

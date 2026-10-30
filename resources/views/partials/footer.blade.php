@@ -36,10 +36,10 @@
             <!-- Kanal -->
             <nav class="col-span-2 lg:col-span-4" aria-label="Kanal">
                 <h4 class="{{ $footerHeading }}">Kanal</h4>
-                <ul class="grid grid-cols-[max-content_max-content] gap-x-8 gap-y-2.5 text-[13px]">
+                <ul class="grid grid-cols-2 gap-x-4 sm:gap-x-8 gap-y-2.5 text-[13px]">
                     @foreach($navCategories as $footerCategory)
-                    <li>
-                        <a href="/?category={{ $footerCategory->slug }}" class="hover:text-[#FFCC00] transition-colors">{{ $footerCategory->name }}</a>
+                    <li class="min-w-0">
+                        <a href="/?category={{ $footerCategory->slug }}" class="hover:text-[#FFCC00] transition-colors break-words">{{ $footerCategory->name }}</a>
                     </li>
                     @endforeach
                 </ul>
@@ -87,8 +87,8 @@
     <div class="bg-black border-t border-neutral-800">
         <div class="max-w-[1080px] mx-auto px-4 sm:px-6 lg:px-8 py-4 flex flex-col md:flex-row items-center justify-between gap-3 text-[11px] text-neutral-500">
             <span class="text-center md:text-left">{!! $siteSettings->copyright ?? 'Copyright &copy; ' . now()->format('Y') . ' Kabar Sahabat. All Rights Reserved' !!}</span>
-            <div class="flex items-center gap-4">
-                <span id="footer-clock" class="tabular-nums whitespace-nowrap">{{ now()->translatedFormat('l, d F Y | H:i') }} WIB</span>
+            <div class="flex flex-wrap items-center justify-center gap-3 sm:gap-4">
+                <span id="footer-clock" class="tabular-nums text-center">{{ now()->translatedFormat('l, d F Y | H:i') }} WIB</span>
                 <a href="/feed.xml" class="hover:text-[#FFCC00] transition-colors">RSS</a>
                 <button type="button" id="back-to-top" aria-label="Kembali ke atas" title="Kembali ke atas" class="w-8 h-8 flex items-center justify-center border border-neutral-700 text-neutral-400 hover:bg-[#FFCC00] hover:border-[#FFCC00] hover:text-neutral-950 transition-colors">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 15l7-7 7 7"/></svg>

@@ -70,9 +70,18 @@ class PostResource extends Resource
                 Forms\Components\TextInput::make('slug')
                     ->required(),
                 Forms\Components\FileUpload::make('image_url')
+                    ->label('Gambar Utama')
                     ->image()
                     ->disk('public')
-                    ->directory('posts'),
+                    ->directory('posts')
+                    ->visibility('public')
+                    ->acceptedFileTypes(['image/jpeg', 'image/png', 'image/webp'])
+                    ->maxSize(2048)
+                    ->imageResizeMode('cover')
+                    ->imageCropAspectRatio('16:9')
+                    ->imageResizeTargetWidth('1200')
+                    ->imageResizeTargetHeight('675')
+                    ->helperText('Maks. 2MB. Otomatis dipotong 16:9 dan di-resize ke 1200×675 untuk performa.'),
                 Forms\Components\TextInput::make('image_caption')
                     ->label('Caption Gambar Utama')
                     ->placeholder('Contoh: Foto: Dok. PMII Walisongo')

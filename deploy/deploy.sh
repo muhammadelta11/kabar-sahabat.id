@@ -77,11 +77,14 @@ php artisan migrate --force
 echo "=> Storage link"
 [ -e public/storage ] || php artisan storage:link
 
-echo "==> Cache config, route, view, event"
+echo "==> Cache config, route, view, event + optimize"
+php artisan optimize:clear
 php artisan config:cache
 php artisan route:cache
 php artisan view:cache
 php artisan event:cache
+php artisan icons:cache 2>/dev/null || true
+php artisan filament:optimize 2>/dev/null || true
 
 if command -v supervisorctl >/dev/null 2>&1; then
     echo "==> Restart queue worker"

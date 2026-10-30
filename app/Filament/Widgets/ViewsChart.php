@@ -4,6 +4,8 @@ namespace App\Filament\Widgets;
 
 use App\Models\PostView;
 use Filament\Widgets\ChartWidget;
+use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\DB;
 
 class ViewsChart extends ChartWidget
 {
@@ -11,34 +13,53 @@ class ViewsChart extends ChartWidget
 
     protected static ?int $sort = 2;
 
+    protected static ?string $pollingInterval = null;
+
     protected int|string|array $columnSpan = 'full';
 
     protected function getData(): array
     {
-        $days = 7;
-        $labels = [];
-        $data = [];
+        $payload = Cache::remember('admin.views_chart_7d', 120, function () {
+            $start = now()->subDays(6)->startOfDay();
+            $driver = DB::connection()->getDriverName();
 
-        for ($i = $days - 1; $i >= 0; $i--) {
-            $date = now()->subDays($i)->startOfDay();
-            $labels[] = $date->format('d M');
-            $data[] = PostView::query()
-                ->whereBetween('viewed_at', [$date, $date->copy()->endOfDay()])
-                ->count();
-        }
+            $dateExpression = match ($driver) {
+                'sqlite' => "strftime('%Y-%m-%d', viewed_at)",
+                'pgsql' => 'DATE(viewed_at)',
+                default => 'DATE(viewed_at)',
+            };
+
+            $rows = PostView::query()
+                ->selectRaw("{$dateExpression} as day, COUNT(*) as total")
+                ->where('viewed_at', '>=', $start)
+                ->groupBy('day')
+                ->pluck('total', 'day');
+
+            $labels = [];
+            $data = [];
+
+            for ($i = 6; $i >= 0; $i--) {
+                $date = now()->subDays($i)->startOfDay();
+                $key = $date->format('Y-m-d');
+                $labels[] = $date->format('d M');
+                $data[] = (int) ($rows[$key] ?? 0);
+            }
+
+            return compact('labels', 'data');
+        });
 
         return [
             'datasets' => [
                 [
                     'label' => 'Pembaca',
-                    'data' => $data,
+                    'data' => $payload['data'],
                     'borderColor' => '#003399',
                     'backgroundColor' => 'rgba(0, 51, 153, 0.1)',
                     'fill' => true,
                     'tension' => 0.3,
                 ],
             ],
-            'labels' => $labels,
+            'labels' => $payload['labels'],
         ];
     }
 
