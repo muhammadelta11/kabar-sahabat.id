@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Post;
 use App\Support\Media;
+use App\Support\PostSlug;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use Mews\Purifier\Facades\Purifier;
@@ -56,7 +57,7 @@ class SubmissionController extends Controller
         Post::create([
             'user_id' => null,
             'title' => $validated['title'],
-            'slug' => Str::slug($validated['title']).'-'.Str::lower(Str::random(8)),
+            'slug' => PostSlug::unique($validated['title']),
             'content' => $this->sanitizeContent($validated['content']),
             'status' => 'Menunggu Review',
             'author_name' => $validated['author_name'],

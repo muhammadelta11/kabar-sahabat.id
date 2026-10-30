@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Jobs\RecordPostView;
 use App\Models\Post;
+use App\Models\PostSlugRedirect;
 use App\Support\NewsCache;
 use Illuminate\Http\Request;
 
@@ -49,7 +50,20 @@ class NewsController extends Controller
             ->with(['categories:id,name,slug', 'user:id,name'])
             ->where('slug', $slug)
             ->where('status', 'Published')
-            ->firstOrFail();
+            ->first();
+
+        if (! $post) {
+            $redirect = PostSlugRedirect::query()
+                ->where('old_slug', $slug)
+                ->with('post:id,slug,status')
+                ->first();
+
+            if ($redirect?->post && $redirect->post->status === 'Published') {
+                return redirect()->route('news.show', $redirect->post->slug, 301);
+            }
+
+            abort(404);
+        }
 
         RecordPostView::dispatch($post->id);
 

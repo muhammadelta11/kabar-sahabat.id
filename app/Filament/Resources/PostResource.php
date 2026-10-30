@@ -4,8 +4,11 @@ namespace App\Filament\Resources;
 
 use App\Filament\Resources\PostResource\Pages;
 use App\Models\Post;
+use App\Support\PostSlug;
 use Filament\Forms;
 use Filament\Forms\Form;
+use Filament\Forms\Get;
+use Filament\Forms\Set;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
@@ -66,9 +69,26 @@ class PostResource extends Resource
                     ->label('Berita Terkait (Baca Juga)')
                     ->columnSpanFull(),
                 Forms\Components\TextInput::make('title')
-                    ->required(),
+                    ->required()
+                    ->live(onBlur: true)
+                    ->afterStateUpdated(function (Set $set, Get $get, ?string $state, Forms\Components\TextInput $component): void {
+                        if (blank($state)) {
+                            return;
+                        }
+
+                        $record = $component->getRecord();
+
+                        // Saat edit, jangan timpa slug yang sudah bersih (hindari ubah URL tanpa sengaja).
+                        if ($record && filled($get('slug')) && PostSlug::isClean($get('slug'))) {
+                            return;
+                        }
+
+                        $set('slug', PostSlug::unique($state, $record?->getKey()));
+                    }),
                 Forms\Components\TextInput::make('slug')
-                    ->required(),
+                    ->required()
+                    ->unique(ignoreRecord: true)
+                    ->helperText('Otomatis dari judul (huruf kecil + strip). Bisa diedit manual.'),
                 Forms\Components\FileUpload::make('image_url')
                     ->label('Gambar Utama')
                     ->image()
