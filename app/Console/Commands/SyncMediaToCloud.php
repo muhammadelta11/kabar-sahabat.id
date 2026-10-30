@@ -22,6 +22,20 @@ class SyncMediaToCloud extends Command
             return self::FAILURE;
         }
 
+        if ($targetDisk === 's3' && ! $this->s3ConfigLooksReady()) {
+            $this->error('Konfigurasi cloud belum lengkap. Isi di .env lalu jalankan ulang:');
+            $this->line('  AWS_ACCESS_KEY_ID=...');
+            $this->line('  AWS_SECRET_ACCESS_KEY=...');
+            $this->line('  AWS_BUCKET=nama-bucket');
+            $this->line('  AWS_DEFAULT_REGION=auto   # atau ap-southeast-1 / us-east-1');
+            $this->line('  AWS_URL=https://cdn.domain-anda');
+            $this->line('  AWS_ENDPOINT=...          # wajib untuk R2/Spaces, kosong untuk AWS S3');
+            $this->newLine();
+            $this->comment('Belum punya bucket? Biarkan MEDIA_DISK=public — sync CDN tidak diperlukan.');
+
+            return self::FAILURE;
+        }
+
         $source = Storage::disk('public');
         $target = Storage::disk($targetDisk);
 
@@ -89,5 +103,12 @@ class SyncMediaToCloud extends Command
         }
 
         return self::SUCCESS;
+    }
+
+    private function s3ConfigLooksReady(): bool
+    {
+        return filled(config('filesystems.disks.s3.key'))
+            && filled(config('filesystems.disks.s3.secret'))
+            && filled(config('filesystems.disks.s3.bucket'));
     }
 }
