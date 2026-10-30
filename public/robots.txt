@@ -1,0 +1,13 @@
+User-agent: *
+Disallow: /admin/
+Disallow: /admin
+Disallow: /livewire/
+Disallow: /storage/
+Disallow: /_debugbar/
+
+Allow: /
+Allow: /berita/
+Allow: /profil-perusahaan
+Allow: /kirim-artikel
+
+Sitemap: https://kabarsahabat.id/sitemap.xml
