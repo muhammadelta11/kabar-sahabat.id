@@ -21,7 +21,7 @@
         <meta property="article:section" content="{{ $cat->name }}">
     @endforeach
     @if($post->image_url)
-        <meta property="og:image" content="{{ url('storage/' . $post->image_url) }}">
+        <meta property="og:image" content="{{ media_url($post->image_url) }}">
         <meta property="og:image:width" content="1200">
         <meta property="og:image:height" content="630">
     @endif
@@ -31,7 +31,7 @@
     <meta name="twitter:title" content="{{ $post->title }}">
     <meta name="twitter:description" content="{{ Str::limit(Str::squish(html_entity_decode(strip_tags($post->excerpt ?? $post->content))), 160) }}">
     @if($post->image_url)
-        <meta name="twitter:image" content="{{ url('storage/' . $post->image_url) }}">
+        <meta name="twitter:image" content="{{ media_url($post->image_url) }}">
     @endif
     <!-- JSON-LD: Article structured data (Google News / Rich Results) -->
     <script type="application/ld+json">
@@ -44,7 +44,7 @@
         @if($post->image_url)
         "image": {
             "@type": "ImageObject",
-            "url": {{ Js::from(url('storage/' . $post->image_url)) }},
+            "url": {{ Js::from(media_url($post->image_url)) }},
             "width": 1200,
             "height": 630
         },
@@ -118,7 +118,7 @@
                 <div class="w-[160px] h-[600px] relative overflow-hidden bg-neutral-200">
                     @if($ads['skin_ad_left']->type === 'image')
                         <a href="{{ $ads['skin_ad_left']->link_url }}" target="_blank" class="block w-full h-full">
-                            <img src="{{ asset('storage/' . $ads['skin_ad_left']->image_url) }}" class="w-full h-full object-cover" alt="{{ $ads['skin_ad_left']->name }}">
+                            <img src="{{ media_url($ads['skin_ad_left']->image_url) }}" class="w-full h-full object-cover" alt="{{ $ads['skin_ad_left']->name }}">
                         </a>
                     @else
                         {!! $ads['skin_ad_left']->script_code !!}
@@ -131,7 +131,7 @@
                 <div class="w-[160px] h-[600px] relative overflow-hidden bg-neutral-200">
                     @if($ads['skin_ad_right']->type === 'image')
                         <a href="{{ $ads['skin_ad_right']->link_url }}" target="_blank" class="block w-full h-full">
-                            <img src="{{ asset('storage/' . $ads['skin_ad_right']->image_url) }}" class="w-full h-full object-cover" alt="{{ $ads['skin_ad_right']->name }}">
+                            <img src="{{ media_url($ads['skin_ad_right']->image_url) }}" class="w-full h-full object-cover" alt="{{ $ads['skin_ad_right']->name }}">
                         </a>
                     @else
                         {!! $ads['skin_ad_right']->script_code !!}
@@ -158,7 +158,7 @@
         <div class="max-w-[1080px] mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row items-center justify-between gap-4">
             <a href="/" class="flex items-center gap-3 group flex-shrink-0">
                 @if(isset($siteSettings) && $siteSettings->logo_path)
-                    <img src="{{ asset('storage/' . $siteSettings->logo_path) }}" class="h-10 sm:h-14 w-auto max-w-[220px] sm:max-w-[300px] object-contain object-left" alt="Logo">
+                    <img src="{{ media_url($siteSettings->logo_path) }}" class="h-10 sm:h-14 w-auto max-w-[220px] sm:max-w-[300px] object-contain object-left" alt="Logo">
                 @else
                     <div class="w-9 h-9 sm:w-11 sm:h-11 bg-[#003399] flex items-center justify-center text-white font-black text-xl sm:text-2xl border-2 border-[#FFCC00]">K</div>
                     <div class="flex flex-col min-w-0">
@@ -174,7 +174,7 @@
             <div class="w-full max-w-full md:max-w-[728px] h-[50px] sm:h-[90px] relative flex-shrink-0 flex items-center justify-center overflow-hidden border border-neutral-200">
                 @if($ads['header_leaderboard']->type === 'image')
                     <a href="{{ $ads['header_leaderboard']->link_url }}" target="_blank" class="block w-full h-full">
-                        <img src="{{ asset('storage/' . $ads['header_leaderboard']->image_url) }}" class="w-full h-full object-cover" alt="{{ $ads['header_leaderboard']->name }}">
+                        <img src="{{ media_url($ads['header_leaderboard']->image_url) }}" class="w-full h-full object-cover" alt="{{ $ads['header_leaderboard']->name }}">
                     </a>
                 @else
                     {!! $ads['header_leaderboard']->script_code !!}
@@ -190,7 +190,7 @@
             <div class="flex items-center justify-between h-11">
                 <a href="/" class="flex-shrink-0 items-center gap-1.5 mr-3 hidden" id="nav-sticky-logo">
                     @if(isset($siteSettings) && $siteSettings->logo_path)
-                        <img src="{{ asset('storage/' . $siteSettings->logo_path) }}" class="h-9 w-auto max-w-[200px] object-contain object-left" alt="Logo">
+                        <img src="{{ media_url($siteSettings->logo_path) }}" class="h-9 w-auto max-w-[200px] object-contain object-left" alt="Logo">
                     @else
                         <div class="w-7 h-7 bg-white flex items-center justify-center font-black text-[#003399] text-sm border border-[#FFCC00]">K</div>
                         <span class="text-sm font-black text-white font-serif hidden sm:block">KABAR SAHABAT</span>
@@ -277,7 +277,7 @@
 
                 <!-- Article Content -->
                 <div id="article-content" class="max-w-none text-neutral-800 leading-relaxed text-[15px] sm:text-base font-medium [&_p]:mb-5 [&_p:last-child]:mb-0 [&_h1]:text-2xl [&_h1]:font-bold [&_h2]:text-xl [&_h2]:font-bold [&_h3]:text-lg [&_h3]:font-bold [&_ul]:list-disc [&_ul]:pl-6 [&_ol]:list-decimal [&_ol]:pl-6 [&_a]:text-[#003399] [&_a]:underline">
-                    {!! $post->content !!}
+                    {!! \App\Support\Media::rewriteContentUrls($post->content) !!}
                 </div>
 
                 <!-- Kredit Penulis & Editor -->
@@ -314,7 +314,7 @@
                         <a href="{{ route('news.show', $mp->slug) }}" class="group flex gap-3">
                             <div class="w-24 h-16 bg-neutral-200 flex-shrink-0 overflow-hidden relative">
                                 @if($mp->image_url)
-                                    <img src="{{ asset('storage/' . $mp->image_url) }}" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" alt="{{ $mp->title }}">
+                                    <img src="{{ media_url($mp->image_url) }}" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" alt="{{ $mp->title }}">
                                 @else
                                     <div class="w-full h-full bg-neutral-300 flex items-center justify-center text-neutral-400">
                                         <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z"/></svg>
@@ -341,7 +341,7 @@
                 <div class="w-full max-w-[300px] h-[250px] mx-auto relative flex items-center justify-center overflow-hidden border border-neutral-200 bg-white rounded-lg mb-8">
                     @if($ads['sidebar_mrec']->type === 'image')
                         <a href="{{ $ads['sidebar_mrec']->link_url }}" target="_blank" class="block w-full h-full">
-                            <img src="{{ asset('storage/' . $ads['sidebar_mrec']->image_url) }}" class="w-full h-full object-cover" alt="{{ $ads['sidebar_mrec']->name }}">
+                            <img src="{{ media_url($ads['sidebar_mrec']->image_url) }}" class="w-full h-full object-cover" alt="{{ $ads['sidebar_mrec']->name }}">
                         </a>
                     @else
                         {!! $ads['sidebar_mrec']->script_code !!}
@@ -372,7 +372,7 @@
                 <div class="w-full max-w-[300px] h-[600px] mx-auto relative flex items-center justify-center overflow-hidden border border-neutral-200 bg-white rounded-lg sticky top-24">
                     @if($ads['sidebar_skyscraper']->type === 'image')
                         <a href="{{ $ads['sidebar_skyscraper']->link_url }}" target="_blank" class="block w-full h-full">
-                            <img src="{{ asset('storage/' . $ads['sidebar_skyscraper']->image_url) }}" class="w-full h-full object-cover" alt="{{ $ads['sidebar_skyscraper']->name }}">
+                            <img src="{{ media_url($ads['sidebar_skyscraper']->image_url) }}" class="w-full h-full object-cover" alt="{{ $ads['sidebar_skyscraper']->name }}">
                         </a>
                     @else
                         {!! $ads['sidebar_skyscraper']->script_code !!}
@@ -394,7 +394,7 @@
                     <article class="group space-y-2">
                         <a href="{{ route('news.show', $pp->slug) }}" class="block aspect-[16/10] bg-neutral-200 overflow-hidden border border-neutral-200 relative">
                             @if($pp->image_url)
-                                <img src="{{ asset('storage/' . $pp->image_url) }}" alt="{{ $pp->title }}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
+                                <img src="{{ media_url($pp->image_url) }}" alt="{{ $pp->title }}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
                             @else
                                 <div class="w-full h-full bg-neutral-300 flex items-center justify-center text-neutral-500 text-xs">KABAR</div>
                             @endif
@@ -423,7 +423,7 @@
                         <a href="{{ route('news.show', $tp->slug) }}" class="flex flex-row items-start gap-3">
                             <div class="w-[100px] sm:w-32 h-[70px] sm:h-[80px] bg-neutral-200 flex-shrink-0 overflow-hidden border border-neutral-200 relative">
                                 @if($tp->image_url)
-                                    <img src="{{ asset('storage/' . $tp->image_url) }}" alt="{{ $tp->title }}" loading="lazy" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
+                                    <img src="{{ media_url($tp->image_url) }}" alt="{{ $tp->title }}" loading="lazy" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
                                 @else
                                     <div class="w-full h-full bg-neutral-300 flex items-center justify-center text-neutral-500 text-xs font-bold">KABAR</div>
                                 @endif
@@ -480,7 +480,7 @@
             <div class="my-6 p-3 bg-neutral-50 border-l-4 border-[#CC0000] shadow-sm flex items-center gap-3 rounded-r-md">
                 <div class="w-16 h-10 bg-neutral-200 overflow-hidden flex-shrink-0 relative border border-neutral-200">
                     @if($bp->image_url)
-                        <img src="{{ asset('storage/' . $bp->image_url) }}" class="w-full h-full object-cover" alt="{{ $bp->title }}">
+                        <img src="{{ media_url($bp->image_url) }}" class="w-full h-full object-cover" alt="{{ $bp->title }}">
                     @else
                         <div class="w-full h-full bg-neutral-300 flex items-center justify-center text-[8px] font-bold text-neutral-400">KABAR</div>
                     @endif

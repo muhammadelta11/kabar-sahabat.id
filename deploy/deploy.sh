@@ -25,6 +25,11 @@
 #    curl -fsSL https://deb.nodesource.com/setup_22.x | bash -
 #    apt install -y nodejs supervisor
 #
+# 5. CDN gambar (opsional, setelah bucket S3/R2/Spaces siap):
+#    - Isi AWS_* + AWS_URL (CDN) di .env (lihat .env.production.example)
+#    - php artisan media:sync-to-cloud
+#    - Set MEDIA_DISK=s3 lalu: php artisan config:cache
+#
 # ============================================================
 # SETUP AWAL APLIKASI (SSH sebagai site user, sekali saja):
 # ============================================================
@@ -46,9 +51,12 @@
 # 8. Deploy pertama:
 #    chmod +x deploy/deploy.sh && ./deploy/deploy.sh
 #
-# 9. Queue worker:
+# 9. Queue worker (wajib: view artikel & job lain jalan di background):
 #    sudo cp deploy/supervisor-kabarsahabat.conf /etc/supervisor/conf.d/
 #    sudo supervisorctl reread && sudo supervisorctl update
+#
+# 10. Scheduler (crontab site user):
+#    * * * * * cd $HOME/htdocs/kabarsahabat.id && php artisan schedule:run >> /dev/null 2>&1
 #
 # Catatan: ganti "kabar-sahabat" di file ini dan di supervisor conf
 #          jika nama site user kamu berbeda.

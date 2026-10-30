@@ -2,8 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Jobs\RecordPostView;
 use App\Models\Post;
-use App\Models\PostView;
 use App\Support\NewsCache;
 use Illuminate\Http\Request;
 
@@ -51,13 +51,7 @@ class NewsController extends Controller
             ->where('status', 'Published')
             ->firstOrFail();
 
-        // Write ringan: 1 increment + 1 insert (diindeks). Untuk traffic sangat tinggi
-        // bisa diganti Redis counter + agregasi berkala.
-        Post::query()->whereKey($post->id)->increment('views_count');
-        PostView::query()->create([
-            'post_id' => $post->id,
-            'viewed_at' => now(),
-        ]);
+        RecordPostView::dispatch($post->id);
 
         $bacaJugaPosts = $post->relatedPosts()
             ->with(['categories:id,name,slug'])

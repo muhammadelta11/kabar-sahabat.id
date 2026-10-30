@@ -2,10 +2,10 @@
 
 namespace App\Models;
 
+use App\Support\Media;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Support\Facades\Storage;
 
 class Post extends Model
 {
@@ -39,7 +39,7 @@ class Post extends Model
             preg_match_all('#storage/kiriman/([A-Za-z0-9]+\.(?:jpe?g|png|webp))#i', (string) $post->content, $matches);
 
             foreach (array_unique($matches[1]) as $filename) {
-                Storage::disk('public')->delete('kiriman/'.$filename);
+                Media::delete('kiriman/'.$filename);
             }
         });
     }

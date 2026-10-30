@@ -24,9 +24,9 @@
                         <span class="text-sm font-medium leading-6 text-gray-950 dark:text-white">Logo Website</span>
                         <span class="text-xs text-gray-500">(JPG/PNG, maks 2MB)</span>
                     </label>
-                    @if($setting->logo_path && Storage::disk('public')->exists($setting->logo_path))
+                    @if($setting->logo_path && \App\Support\Media::exists($setting->logo_path))
                         <div class="mb-2 flex items-center gap-3">
-                            <img src="{{ asset('storage/' . $setting->logo_path) }}" alt="Logo" class="h-12 object-contain border border-gray-200 rounded p-1 bg-white">
+                            <img src="{{ media_url($setting->logo_path) }}" alt="Logo" class="h-12 object-contain border border-gray-200 rounded p-1 bg-white">
                             <span class="text-xs text-gray-500">Logo saat ini</span>
                         </div>
                     @endif

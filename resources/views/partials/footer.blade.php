@@ -14,7 +14,7 @@
             <div class="col-span-2 lg:col-span-3 lg:pr-2">
                 <a href="/" class="inline-flex items-center gap-2.5">
                     @if(isset($siteSettings) && $siteSettings->logo_path)
-                        <img src="{{ asset('storage/' . $siteSettings->logo_path) }}" class="h-12 w-auto max-w-[240px] object-contain object-left" alt="Logo Kabar Sahabat">
+                        <img src="{{ media_url($siteSettings->logo_path) }}" class="h-12 w-auto max-w-[240px] object-contain object-left" alt="Logo Kabar Sahabat">
                     @else
                         <span class="w-10 h-10 bg-[#003399] text-white flex items-center justify-center font-black text-xl border-2 border-[#FFCC00]">K</span>
                         <span class="font-serif font-black text-2xl tracking-tighter leading-none">

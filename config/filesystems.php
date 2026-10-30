@@ -17,6 +17,18 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Media Disk (gambar berita, logo, iklan, kiriman publik)
+    |--------------------------------------------------------------------------
+    |
+    | local development: public
+    | production CDN: s3 (AWS S3, Cloudflare R2, DigitalOcean Spaces, dll.)
+    |
+    */
+
+    'media_disk' => env('MEDIA_DISK', 'public'),
+
+    /*
+    |--------------------------------------------------------------------------
     | Filesystem Disks
     |--------------------------------------------------------------------------
     |
@@ -51,13 +63,20 @@ return [
             'driver' => 's3',
             'key' => env('AWS_ACCESS_KEY_ID'),
             'secret' => env('AWS_SECRET_ACCESS_KEY'),
-            'region' => env('AWS_DEFAULT_REGION'),
+            'region' => env('AWS_DEFAULT_REGION', 'auto'),
             'bucket' => env('AWS_BUCKET'),
+            // URL publik/CDN, contoh: https://cdn.kabarsahabat.id
             'url' => env('AWS_URL'),
+            // Endpoint S3-compatible (R2/Spaces). Kosongkan untuk AWS S3 murni.
             'endpoint' => env('AWS_ENDPOINT'),
             'use_path_style_endpoint' => env('AWS_USE_PATH_STYLE_ENDPOINT', false),
+            'visibility' => 'public',
             'throw' => false,
             'report' => false,
+            'root' => env('AWS_ROOT', ''),
+            'options' => [
+                'CacheControl' => 'public, max-age=31536000, immutable',
+            ],
         ],
 
     ],

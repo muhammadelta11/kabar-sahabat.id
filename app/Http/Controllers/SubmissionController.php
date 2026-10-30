@@ -3,8 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Models\Post;
+use App\Support\Media;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Mews\Purifier\Facades\Purifier;
 
@@ -102,16 +102,17 @@ class SubmissionController extends Controller
         imagedestroy($source);
 
         $filename = Str::random(40).'.'.$extension;
-        Storage::disk('public')->put('kiriman/'.$filename, $binary);
+        Media::put('kiriman/'.$filename, $binary);
 
         return response()->json([
-            'url' => Storage::url('kiriman/'.$filename),
+            // Simpan path relatif di HTML; media_url/rewrite mengubah ke CDN saat tampil
+            'url' => '/storage/kiriman/'.$filename,
         ]);
     }
 
     /**
      * Bersihkan HTML kiriman publik, lalu pastikan:
-     * - <img> hanya menunjuk ke /storage/kiriman milik situs sendiri
+     * - <img> hanya menunjuk ke /storage/kiriman milik situs sendiri (atau CDN kiriman)
      * - semua <a> membawa rel noopener noreferrer
      */
     private function sanitizeContent(string $html): string
@@ -124,10 +125,11 @@ class SubmissionController extends Controller
         libxml_clear_errors();
 
         foreach (iterator_to_array($dom->getElementsByTagName('img')) as $img) {
-            $path = parse_url((string) $img->getAttribute('src'), PHP_URL_PATH) ?: '';
+            $src = (string) $img->getAttribute('src');
 
-            if (str_starts_with($path, '/storage/kiriman/')) {
-                $img->setAttribute('src', $path);
+            if (Media::isTrustedKirimanUrl($src)) {
+                $filename = basename(parse_url($src, PHP_URL_PATH) ?: $src);
+                $img->setAttribute('src', '/storage/kiriman/'.$filename);
             } else {
                 $img->parentNode?->removeChild($img);
             }

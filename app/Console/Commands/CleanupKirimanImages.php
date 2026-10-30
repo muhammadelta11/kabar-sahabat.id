@@ -3,10 +3,10 @@
 namespace App\Console\Commands;
 
 use App\Models\Post;
+use App\Support\Media;
 use Illuminate\Console\Attributes\Description;
 use Illuminate\Console\Attributes\Signature;
 use Illuminate\Console\Command;
-use Illuminate\Support\Facades\Storage;
 
 #[Signature('kiriman:bersihkan {--hari=1 : Usia file minimum dalam hari}')]
 #[Description('Menghapus gambar kiriman publik yang tidak direferensikan artikel mana pun')]
@@ -17,7 +17,7 @@ class CleanupKirimanImages extends Command
      */
     public function handle(): int
     {
-        $disk = Storage::disk('public');
+        $disk = Media::disk();
 
         if (! $disk->directoryExists('kiriman')) {
             $this->info('Tidak ada direktori kiriman.');

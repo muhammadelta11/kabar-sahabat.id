@@ -72,7 +72,7 @@ class PostResource extends Resource
                 Forms\Components\FileUpload::make('image_url')
                     ->label('Gambar Utama')
                     ->image()
-                    ->disk('public')
+                    ->disk(fn () => media_disk())
                     ->directory('posts')
                     ->visibility('public')
                     ->acceptedFileTypes(['image/jpeg', 'image/png', 'image/webp'])
@@ -81,7 +81,7 @@ class PostResource extends Resource
                     ->imageCropAspectRatio('16:9')
                     ->imageResizeTargetWidth('1200')
                     ->imageResizeTargetHeight('675')
-                    ->helperText('Maks. 2MB. Otomatis dipotong 16:9 dan di-resize ke 1200×675 untuk performa.'),
+                    ->helperText('Maks. 2MB. Otomatis dipotong 16:9 dan di-resize ke 1200×675. Disimpan ke disk media (lokal/CDN).'),
                 Forms\Components\TextInput::make('image_caption')
                     ->label('Caption Gambar Utama')
                     ->placeholder('Contoh: Foto: Dok. PMII Walisongo')
@@ -122,7 +122,8 @@ class PostResource extends Resource
                     ->searchable(),
                 Tables\Columns\TextColumn::make('slug')
                     ->searchable(),
-                Tables\Columns\ImageColumn::make('image_url'),
+                Tables\Columns\ImageColumn::make('image_url')
+                    ->disk(fn () => media_disk()),
                 Tables\Columns\TextColumn::make('status')
                     ->badge()
                     ->color(fn (string $state): string => match ($state) {

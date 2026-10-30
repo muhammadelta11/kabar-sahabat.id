@@ -34,7 +34,7 @@ class AdminPanelProvider extends PanelProvider
             ->brandLogo(function (): ?string {
                 $path = Setting::query()->value('logo_path');
 
-                return $path ? asset('storage/'.$path) : null;
+                return $path ? media_url($path) : null;
             })
             ->brandLogoHeight('3rem')
             ->colors([

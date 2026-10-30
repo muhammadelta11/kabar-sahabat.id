@@ -3,8 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Models\Setting;
+use App\Support\Media;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Storage;
 
 class SettingsController extends Controller
 {
@@ -37,12 +37,8 @@ class SettingsController extends Controller
         $setting = Setting::first() ?? new Setting;
 
         if ($request->hasFile('logo')) {
-            // Delete old logo if exists
-            if ($setting->logo_path && Storage::disk('public')->exists($setting->logo_path)) {
-                Storage::disk('public')->delete($setting->logo_path);
-            }
-            $path = $request->file('logo')->store('settings', 'public');
-            $setting->logo_path = $path;
+            Media::delete($setting->logo_path);
+            $setting->logo_path = Media::storeUploaded($request->file('logo'), 'settings');
         }
 
         $setting->tagline = $request->tagline;

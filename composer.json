@@ -10,6 +10,7 @@
         "filament/filament": "^3.2",
         "laravel/framework": "^13.17",
         "laravel/tinker": "^3.0",
+        "league/flysystem-aws-s3-v3": "^3.0",
         "mews/purifier": "^3.4"
     },
     "require-dev": {
@@ -28,7 +29,10 @@
             "App\\": "app/",
             "Database\\Factories\\": "database/factories/",
             "Database\\Seeders\\": "database/seeders/"
-        }
+        },
+        "files": [
+            "app/helpers.php"
+        ]
     },
     "autoload-dev": {
         "psr-4": {

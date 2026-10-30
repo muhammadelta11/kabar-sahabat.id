@@ -52,8 +52,11 @@ class AdvertisementResource extends Resource
                 Forms\Components\FileUpload::make('image_url')
                     ->label('File Gambar Banner')
                     ->image()
-                    ->disk('public')
+                    ->disk(fn () => media_disk())
                     ->directory('ads')
+                    ->visibility('public')
+                    ->acceptedFileTypes(['image/jpeg', 'image/png', 'image/webp'])
+                    ->maxSize(2048)
                     ->visible(fn (Forms\Get $get) => $get('type') === 'image')
                     ->columnSpanFull(),
                 Forms\Components\TextInput::make('link_url')

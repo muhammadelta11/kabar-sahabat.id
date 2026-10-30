@@ -20,7 +20,7 @@
             @endforeach
             <description><![CDATA[{{ Str::limit(strip_tags($post->excerpt ?? $post->content), 300) }}]]></description>
             @if($post->image_url)
-            <enclosure url="{{ url('storage/' . $post->image_url) }}" type="image/jpeg" length="0"/>
+            <enclosure url="{{ media_url($post->image_url) }}" type="image/jpeg" length="0"/>
             @endif
         </item>
         @endforeach

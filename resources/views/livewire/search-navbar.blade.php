@@ -56,7 +56,7 @@
                     <a href="{{ route('news.show', $post->slug) }}" class="flex items-start gap-2.5 p-3 hover:bg-neutral-50 transition-colors">
                         <div class="w-12 h-8 bg-neutral-200 flex-shrink-0 overflow-hidden relative rounded-sm">
                             @if($post->image_url)
-                                <img src="{{ asset('storage/' . $post->image_url) }}" alt="{{ $post->title }}" class="w-full h-full object-cover">
+                                <img src="{{ media_url($post->image_url) }}" alt="{{ $post->title }}" class="w-full h-full object-cover">
                             @else
                                 <div class="w-full h-full bg-neutral-300 flex items-center justify-center text-[8px] font-bold text-neutral-500">KABAR</div>
                             @endif
@@ -89,7 +89,7 @@
                     <a href="{{ route('news.show', $post->slug) }}" class="flex items-start gap-2.5 p-3 hover:bg-neutral-50 transition-colors group">
                         <div class="w-12 h-8 bg-neutral-200 flex-shrink-0 overflow-hidden relative rounded-sm">
                             @if($post->image_url)
-                                <img src="{{ asset('storage/' . $post->image_url) }}" alt="{{ $post->title }}" class="w-full h-full object-cover">
+                                <img src="{{ media_url($post->image_url) }}" alt="{{ $post->title }}" class="w-full h-full object-cover">
                             @else
                                 <div class="w-full h-full bg-neutral-300 flex items-center justify-center text-[8px] font-bold text-neutral-500">KABAR</div>
                             @endif

@@ -11,7 +11,7 @@
         <priority>0.8</priority>
         @if($post->image_url)
         <image:image>
-            <image:loc>{{ url('storage/' . $post->image_url) }}</image:loc>
+            <image:loc>{{ media_url($post->image_url) }}</image:loc>
         </image:image>
         @endif
     </url>

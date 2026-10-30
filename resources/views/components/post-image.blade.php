@@ -5,7 +5,7 @@
 ])
 
 @php
-    $url = \App\Support\Media::url($src);
+    $url = media_url($src);
 @endphp
 
 @if($url)

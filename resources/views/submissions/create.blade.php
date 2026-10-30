@@ -10,7 +10,7 @@
         <div class="max-w-[1080px] mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between">
             <a href="/" class="flex items-center gap-3 group">
                 @if(isset($siteSettings) && $siteSettings->logo_path)
-                    <img src="{{ asset('storage/' . $siteSettings->logo_path) }}" class="h-14 w-auto max-w-[300px] object-contain object-left" alt="Logo">
+                    <img src="{{ media_url($siteSettings->logo_path) }}" class="h-14 w-auto max-w-[300px] object-contain object-left" alt="Logo">
                 @else
                     <div class="w-11 h-11 bg-[#003399] flex items-center justify-center text-white font-black text-2xl border-2 border-[#FFCC00]">K</div>
                     <div class="flex flex-col">
