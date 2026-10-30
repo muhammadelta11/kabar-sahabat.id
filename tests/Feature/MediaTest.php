@@ -7,9 +7,9 @@ it('membangun url media lokal dari path relatif', function () {
     config(['filesystems.media_disk' => 'public']);
 
     expect(media_url('posts/foto.jpg'))
-        ->toEndWith('/storage/posts/foto.jpg')
+        ->toBe('/storage/posts/foto.jpg')
         ->and(media_url('/storage/kiriman/a.jpg'))
-        ->toEndWith('/storage/kiriman/a.jpg')
+        ->toBe('/storage/kiriman/a.jpg')
         ->and(media_url('https://cdn.example/x.jpg'))
         ->toBe('https://cdn.example/x.jpg');
 });

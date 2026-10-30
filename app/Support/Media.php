@@ -39,6 +39,11 @@ class Media
             $path = substr($path, strlen('storage/'));
         }
 
+        // Disk lokal: URL relatif agar tidak tergantung APP_URL (sering salah di hosting).
+        if (self::diskName() === 'public') {
+            return '/storage/'.$path;
+        }
+
         return self::disk()->url($path);
     }
 
