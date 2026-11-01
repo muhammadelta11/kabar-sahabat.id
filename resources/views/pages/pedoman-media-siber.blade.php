@@ -4,8 +4,8 @@
 @section('page-description', 'Pedoman Pemberitaan Media Siber yang ditetapkan Dewan Pers dan menjadi acuan pemberitaan Kabar Sahabat.')
 
 @section('page-content')
-<div class="space-y-4 [&_h3]:text-lg [&_h3]:font-black [&_h3]:text-[#003399] [&_h3]:pt-4 [&_ol]:list-[lower-alpha] [&_ol]:pl-5 [&_ol]:space-y-2 [&_ol_ol]:list-decimal [&_ol_ol]:mt-2 [&_ol_ol]:space-y-1">
-    <h2 class="text-2xl font-black text-neutral-900 font-serif leading-tight">Pedoman Pemberitaan Media Siber</h2>
+<div class="space-y-4 [&_h3]:text-lg [&_h3]:font-black [&_h3]:text-brand [&_h3]:font-display [&_h3]:pt-4 [&_ol]:list-[lower-alpha] [&_ol]:pl-5 [&_ol]:space-y-2 [&_ol_ol]:list-decimal [&_ol_ol]:mt-2 [&_ol_ol]:space-y-1">
+    <h2 class="text-2xl font-black text-ink font-display leading-tight">Pedoman Pemberitaan Media Siber</h2>
 
     <p>Kemerdekaan berpendapat, kemerdekaan berekspresi, dan kemerdekaan pers adalah hak asasi manusia yang dilindungi Pancasila, Undang-Undang Dasar 1945, dan Deklarasi Universal Hak Asasi Manusia PBB. Keberadaan media siber di Indonesia juga merupakan bagian dari kemerdekaan berpendapat, kemerdekaan berekspresi, dan kemerdekaan pers.</p>
     <p>Media siber memiliki karakter khusus sehingga memerlukan pedoman agar pengelolaannya dapat dilaksanakan secara profesional, memenuhi fungsi, hak, dan kewajibannya sesuai Undang-Undang Nomor 40 Tahun 1999 tentang Pers dan Kode Etik Jurnalistik. Untuk itu Dewan Pers bersama organisasi pers, pengelola media siber, dan masyarakat menyusun Pedoman Pemberitaan Media Siber sebagai berikut:</p>
@@ -86,6 +86,6 @@
     <h3>9. Sengketa</h3>
     <p>Penilaian akhir atas sengketa mengenai pelaksanaan Pedoman Pemberitaan Media Siber ini diselesaikan oleh Dewan Pers.</p>
 
-    <p class="pt-4 text-sm text-neutral-500 italic">Jakarta, 3 Februari 2012. Pedoman ini ditandatangani oleh Dewan Pers dan komunitas pers di Jakarta, 3 Februari 2012.</p>
+    <p class="pt-4 text-sm text-ink-muted italic">Jakarta, 3 Februari 2012. Pedoman ini ditandatangani oleh Dewan Pers dan komunitas pers di Jakarta, 3 Februari 2012.</p>
 </div>
 @endsection

@@ -26,90 +26,52 @@
         'pages.pedoman-media-siber' => 'Pedoman Media Siber',
     ];
 @endphp
-<div class="bg-[#F8F9FA] min-h-screen text-neutral-900 font-sans antialiased overflow-x-hidden w-full">
+<div class="bg-surface min-h-screen text-ink font-sans antialiased w-full">
 
-    <!-- TOP BAR -->
-    <div class="bg-neutral-900 text-white text-[11px] border-b border-neutral-800">
-        <div class="max-w-[1080px] mx-auto px-4 sm:px-6 lg:px-8 h-8 flex items-center">
-            <span class="text-neutral-400 font-medium whitespace-nowrap">{{ now()->translatedFormat('l, d F Y') }}</span>
-        </div>
-    </div>
+    <x-site.header :show-trending="false" />
 
-    <!-- BRANDING -->
-    <div class="bg-white border-b border-neutral-200 py-4">
-        <div class="max-w-[1080px] mx-auto px-4 sm:px-6 lg:px-8 flex items-center">
-            <a href="/" class="flex items-center gap-3 flex-shrink-0">
-                @if(isset($siteSettings) && $siteSettings->logo_path)
-                    <img src="{{ media_url($siteSettings->logo_path) }}" class="h-14 w-auto max-w-[300px] object-contain object-left" alt="Kabar Sahabat">
-                @else
-                    <div class="w-11 h-11 bg-[#003399] flex items-center justify-center text-white font-black text-2xl border-2 border-[#FFCC00]">K</div>
-                    <div class="flex flex-col">
-                        <div class="flex items-center gap-1 leading-none">
-                            <span class="text-3xl font-black tracking-tighter text-[#003399] font-serif">KABAR</span>
-                            <span class="text-3xl font-black tracking-tighter text-[#FFCC00] font-serif">SAHABAT</span>
-                        </div>
-                        <span class="text-[9px] text-neutral-500 font-bold uppercase tracking-widest mt-1">{{ $siteSettings->tagline ?? 'Jernih Melihat Pergerakan' }}</span>
+    <main class="site-container py-6 sm:py-8 space-y-5">
+        <x-news.breadcrumb :items="[
+            ['label' => 'Beranda', 'href' => route('news.index')],
+            ['label' => trim($__env->yieldContent('page-title'))],
+        ]" />
+
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-5 lg:gap-6">
+            <aside class="lg:col-span-3">
+                <nav class="bg-white border border-neutral-100 shadow-sm rounded-2xl overflow-hidden lg:sticky lg:top-16" aria-label="Informasi">
+                    <div class="px-4 py-3 border-b border-neutral-100">
+                        <h2 class="text-sm font-black text-brand font-display flex items-center gap-2">
+                            <span class="w-1 h-4 rounded-full bg-accent"></span>
+                            Informasi
+                        </h2>
                     </div>
-                @endif
-            </a>
-        </div>
-    </div>
-
-    <!-- NAVBAR KANAL -->
-    <nav class="sticky top-0 z-50 bg-[#003399] border-b-4 border-[#FFCC00] shadow-md">
-        <div class="max-w-[1080px] mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex items-center justify-between h-11">
-                <div class="relative flex-1 min-w-0 h-full">
-                    <div class="flex items-center overflow-x-auto h-full pr-6 scrollbar-none" style="scrollbar-width:none;">
-                        <a href="/" class="h-full flex items-center px-4 text-[11px] font-bold uppercase tracking-wider text-white/90 hover:text-white hover:bg-[#002b80] transition-colors whitespace-nowrap">Beranda</a>
-                        @foreach($navCategories as $navCategory)
-                        <a href="/?category={{ $navCategory->slug }}" class="h-full flex items-center px-4 text-[11px] font-bold uppercase tracking-wider text-white/90 hover:text-white hover:bg-[#002b80] transition-colors whitespace-nowrap">{{ $navCategory->name }}</a>
+                    <div class="flex lg:flex-col overflow-x-auto divide-x lg:divide-x-0 lg:divide-y divide-neutral-50 scrollbar-none">
+                        @foreach($infoPages as $routeName => $label)
+                            <a
+                                href="{{ route($routeName) }}"
+                                class="px-4 py-3 text-sm whitespace-nowrap transition-colors {{ request()->routeIs($routeName) ? 'font-bold text-brand bg-brand/5 lg:border-l-4 lg:border-l-accent' : 'text-ink-muted hover:text-brand hover:bg-surface/80' }}"
+                            >
+                                {{ $label }}
+                            </a>
                         @endforeach
                     </div>
-                    <div class="pointer-events-none absolute inset-y-0 right-0 w-12" style="background: linear-gradient(to left, #003399 20%, rgba(0,51,153,0))"></div>
-                </div>
+                </nav>
+            </aside>
 
-                <livewire:search-navbar />
-            </div>
+            <article class="lg:col-span-9 bg-white border border-neutral-100 shadow-sm rounded-2xl overflow-hidden">
+                <div class="px-5 sm:px-6 py-3.5 border-b border-neutral-100">
+                    <h1 class="text-sm sm:text-base font-black tracking-tight text-ink font-display flex items-center gap-2">
+                        <span class="w-1 h-5 rounded-full bg-accent flex-shrink-0"></span>
+                        @yield('page-title')
+                    </h1>
+                </div>
+                <div class="px-5 sm:px-8 py-6 md:px-10 md:py-8 text-ink-muted leading-relaxed [&_a]:text-brand [&_a]:font-medium hover:[&_a]:underline">
+                    @yield('page-content')
+                </div>
+            </article>
         </div>
-    </nav>
-
-    <!-- BREADCRUMB -->
-    <div class="bg-white border-b border-neutral-200">
-        <div class="max-w-[1080px] mx-auto px-4 sm:px-6 lg:px-8 py-3 flex items-center gap-2 text-xs text-neutral-500">
-            <a href="/" class="hover:text-[#003399] transition-colors">Beranda</a>
-            <span>›</span>
-            <span class="text-neutral-900 font-medium">@yield('page-title')</span>
-        </div>
-    </div>
-
-    <main class="max-w-[1080px] mx-auto px-4 sm:px-6 lg:px-8 py-8 grid grid-cols-1 lg:grid-cols-12 gap-6">
-        <!-- MENU INFORMASI -->
-        <aside class="lg:col-span-3">
-            <div class="bg-white border border-neutral-200 shadow-sm rounded-lg overflow-hidden lg:sticky lg:top-16">
-                <div class="border-b-2 border-[#003399] px-4 py-2.5">
-                    <h2 class="text-sm font-black uppercase tracking-tight text-[#003399]">Informasi</h2>
-                </div>
-                <div class="flex lg:flex-col overflow-x-auto divide-x lg:divide-x-0 lg:divide-y divide-neutral-100" style="scrollbar-width:none;">
-                    @foreach($infoPages as $routeName => $label)
-                    <a href="{{ route($routeName) }}" class="px-4 py-3 text-sm whitespace-nowrap transition-colors {{ request()->routeIs($routeName) ? 'font-bold text-[#003399] bg-[#003399]/5 lg:border-l-4 lg:border-l-[#FFCC00]' : 'text-neutral-700 hover:text-[#003399] hover:bg-neutral-50' }}">{{ $label }}</a>
-                    @endforeach
-                </div>
-            </div>
-        </aside>
-
-        <!-- KONTEN -->
-        <article class="lg:col-span-9 bg-white border border-neutral-200 shadow-sm rounded-lg overflow-hidden">
-            <div class="border-b-2 border-[#003399] px-6 py-3 flex items-center gap-2">
-                <span class="w-2.5 h-4 bg-[#FFCC00] inline-block"></span>
-                <h1 class="text-sm font-black uppercase tracking-tight text-[#003399]">@yield('page-title')</h1>
-            </div>
-            <div class="px-6 py-6 md:px-10 md:py-8 text-neutral-700 leading-relaxed">
-                @yield('page-content')
-            </div>
-        </article>
     </main>
 
-    @include('partials.footer')
+    <x-site.footer />
 </div>
 @endsection

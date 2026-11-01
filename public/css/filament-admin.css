@@ -1,0 +1,674 @@
+/* Kabar Sahabat — Filament admin premium shell (light + dark) */
+
+:root {
+    --ks-brand: #003399;
+    --ks-brand-dark: #002266;
+    --ks-brand-deep: #001a4d;
+    --ks-accent: #f97316;
+    --ks-accent-soft: #ffb020;
+    --ks-surface: #f3f5f9;
+    --ks-card: #ffffff;
+    --ks-ink: #0f172a;
+    --ks-muted: #64748b;
+    --ks-border: rgb(226 232 240 / 0.95);
+    --ks-header-bg: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
+    --ks-header-border: #f1f5f9;
+    --ks-table-head: #f8fafc;
+    --ks-stat-bg: linear-gradient(160deg, #ffffff 0%, #f8fafc 100%);
+    --ks-radius: 1rem;
+    --ks-shadow: 0 10px 30px -18px rgb(0 51 153 / 0.28);
+    --ks-shadow-soft: 0 6px 18px -12px rgb(15 23 42 / 0.18);
+}
+
+.dark {
+    --ks-surface: #0b1220;
+    --ks-card: #111827;
+    --ks-ink: #f1f5f9;
+    --ks-muted: #94a3b8;
+    --ks-border: rgb(51 65 85 / 0.85);
+    --ks-header-bg: linear-gradient(180deg, #111827 0%, #0f172a 100%);
+    --ks-header-border: rgb(51 65 85 / 0.7);
+    --ks-table-head: #0f172a;
+    --ks-stat-bg: linear-gradient(160deg, #111827 0%, #0f172a 100%);
+    --ks-shadow: 0 10px 30px -18px rgb(0 0 0 / 0.55);
+    --ks-shadow-soft: 0 6px 18px -12px rgb(0 0 0 / 0.45);
+}
+
+/* ===== Shell / canvas ===== */
+.fi-main,
+.fi-main-ctn,
+.fi-body {
+    background:
+        radial-gradient(1200px 480px at 0% -10%, rgb(0 51 153 / 0.07), transparent 55%),
+        radial-gradient(900px 420px at 100% 0%, rgb(249 115 22 / 0.06), transparent 50%),
+        var(--ks-surface) !important;
+}
+
+.dark .fi-main,
+.dark .fi-main-ctn,
+.dark .fi-body {
+    background:
+        radial-gradient(1200px 480px at 0% -10%, rgb(0 51 153 / 0.18), transparent 55%),
+        radial-gradient(900px 420px at 100% 0%, rgb(249 115 22 / 0.1), transparent 50%),
+        var(--ks-surface) !important;
+}
+
+.fi-page,
+.fi-simple-page {
+    font-feature-settings: "ss01" on, "cv01" on;
+}
+
+.fi-header-heading {
+    letter-spacing: -0.025em !important;
+    font-weight: 800 !important;
+    color: var(--ks-ink) !important;
+}
+
+.fi-header-subheading {
+    color: var(--ks-muted) !important;
+    font-weight: 500 !important;
+}
+
+/* ===== Topbar + sidebar brand ===== */
+.fi-topbar,
+.fi-topbar > nav {
+    background: linear-gradient(180deg, var(--ks-brand) 0%, var(--ks-brand-dark) 100%) !important;
+    height: 4rem !important;
+    border-bottom: 3px solid var(--ks-accent-soft) !important;
+    box-shadow: 0 8px 24px -16px rgb(0 26 77 / 0.55) !important;
+}
+
+.fi-topbar > nav > *,
+.fi-topbar .fi-topbar-item-button,
+.fi-topbar .fi-icon-btn,
+.fi-topbar .fi-avatar,
+.fi-topbar .fi-badge {
+    color: #ffffff !important;
+}
+
+.fi-topbar .fi-icon-btn svg,
+.fi-topbar .fi-topbar-item-button svg {
+    color: #ffffff !important;
+}
+
+/* Panel dropdown keluar dari topbar biru — reset ke token surface */
+.fi-topbar .fi-dropdown-panel {
+    background: var(--ks-card) !important;
+    border: 1px solid var(--ks-border) !important;
+    color: var(--ks-ink) !important;
+}
+
+.fi-topbar .fi-dropdown-panel a,
+.fi-topbar .fi-dropdown-panel button,
+.fi-topbar .fi-dropdown-panel span,
+.fi-topbar .fi-dropdown-panel svg,
+.fi-topbar .fi-dropdown-panel div {
+    color: var(--ks-ink) !important;
+}
+
+.fi-topbar .fi-dropdown-panel .fi-dropdown-list-item-label,
+.fi-topbar .fi-dropdown-panel .fi-dropdown-header {
+    color: var(--ks-ink) !important;
+}
+
+.fi-topbar .fi-dropdown-panel .text-gray-400,
+.fi-topbar .fi-dropdown-panel .text-gray-500,
+.fi-topbar .fi-dropdown-panel [class*="text-gray-"] {
+    color: var(--ks-muted) !important;
+}
+
+.fi-sidebar {
+    background: #ffffff !important;
+    border-inline-end: 1px solid var(--ks-border) !important;
+    box-shadow: 8px 0 30px -24px rgb(15 23 42 / 0.35);
+}
+
+.dark .fi-sidebar {
+    background: #0b1220 !important;
+    border-inline-end-color: rgb(51 65 85 / 0.7) !important;
+    box-shadow: 8px 0 30px -24px rgb(0 0 0 / 0.55);
+}
+
+.fi-sidebar-header {
+    background: linear-gradient(180deg, var(--ks-brand) 0%, var(--ks-brand-dark) 100%) !important;
+    height: 4rem !important;
+    display: flex !important;
+    align-items: center !important;
+    padding-top: 0 !important;
+    padding-bottom: 0 !important;
+    border-bottom: 3px solid var(--ks-accent-soft) !important;
+}
+
+.fi-sidebar-header .fi-logo,
+.fi-sidebar-header a,
+.fi-sidebar-header span {
+    color: #ffffff !important;
+    font-weight: 800 !important;
+}
+
+/* ===== Navigation ===== */
+.fi-sidebar-nav {
+    padding: 0.85rem 0.7rem 1.25rem !important;
+    gap: 0.2rem !important;
+}
+
+.fi-sidebar-group-label {
+    font-size: 0.65rem !important;
+    font-weight: 800 !important;
+    letter-spacing: 0.08em !important;
+    text-transform: uppercase !important;
+    color: var(--ks-muted) !important;
+    margin-top: 0.65rem !important;
+    margin-bottom: 0.35rem !important;
+}
+
+.fi-sidebar-item-button {
+    border-radius: 0.75rem !important;
+    padding: 0.55rem 0.7rem !important;
+    transition: background-color 150ms ease, color 150ms ease, transform 150ms ease !important;
+    color: var(--ks-ink) !important;
+}
+
+.fi-sidebar-item-button:hover {
+    background: rgb(0 51 153 / 0.06) !important;
+    transform: translateX(1px);
+}
+
+.dark .fi-sidebar-item-button:hover {
+    background: rgb(148 163 184 / 0.1) !important;
+}
+
+.fi-sidebar-item-button.fi-active,
+.fi-sidebar-item.fi-active > .fi-sidebar-item-button {
+    background: linear-gradient(135deg, rgb(0 51 153 / 0.12), rgb(249 115 22 / 0.08)) !important;
+    color: var(--ks-brand) !important;
+    box-shadow: inset 3px 0 0 var(--ks-accent);
+    font-weight: 700 !important;
+}
+
+.dark .fi-sidebar-item-button.fi-active,
+.dark .fi-sidebar-item.fi-active > .fi-sidebar-item-button {
+    background: linear-gradient(135deg, rgb(96 165 250 / 0.16), rgb(249 115 22 / 0.12)) !important;
+    color: #93c5fd !important;
+}
+
+.fi-sidebar-item-icon {
+    color: var(--ks-brand) !important;
+    opacity: 0.85;
+}
+
+.dark .fi-sidebar-item-icon {
+    color: #93c5fd !important;
+}
+
+.fi-sidebar-item.fi-active .fi-sidebar-item-icon {
+    color: var(--ks-accent) !important;
+    opacity: 1;
+}
+
+/* ===== Cards / sections / widgets ===== */
+.fi-section,
+.fi-wi-widget,
+.fi-ta-ctn,
+.fi-fo-tabs,
+.fi-modal-window {
+    border-radius: var(--ks-radius) !important;
+}
+
+.fi-section,
+.fi-wi-widget,
+.fi-ta-ctn {
+    box-shadow: var(--ks-shadow-soft) !important;
+    border: 1px solid var(--ks-border) !important;
+    background: var(--ks-card) !important;
+    overflow: hidden;
+}
+
+.fi-section-header,
+.fi-wi-widget > .fi-section > .fi-section-header,
+.fi-ta-header {
+    background: var(--ks-header-bg) !important;
+    border-bottom: 1px solid var(--ks-header-border) !important;
+}
+
+.fi-section-header-heading,
+.fi-wi-widget .fi-section-header-heading {
+    font-weight: 800 !important;
+    letter-spacing: -0.02em !important;
+    color: var(--ks-ink) !important;
+}
+
+.fi-section-header-description,
+.fi-wi-widget .fi-section-header-description {
+    color: var(--ks-muted) !important;
+}
+
+/* ===== Stats =====
+   Jangan override color value/description — biarkan token Filament
+   (success/info/warning/primary) hidup di light & dark. */
+.fi-wi-stats-overview-stat {
+    padding: 1rem 1.1rem !important;
+    gap: 0.2rem !important;
+    border-radius: 0.95rem !important;
+    border: 1px solid var(--ks-border) !important;
+    background: var(--ks-stat-bg) !important;
+    box-shadow: var(--ks-shadow-soft) !important;
+    transition: transform 160ms ease, box-shadow 160ms ease !important;
+}
+
+.fi-wi-stats-overview-stat:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--ks-shadow) !important;
+}
+
+.fi-wi-stats-overview-stat-label {
+    font-size: 0.72rem !important;
+    font-weight: 700 !important;
+    letter-spacing: 0.04em !important;
+    text-transform: uppercase !important;
+}
+
+.fi-wi-stats-overview-stat-value {
+    font-size: 1.55rem !important;
+    line-height: 1.7rem !important;
+    font-weight: 800 !important;
+    letter-spacing: -0.03em !important;
+}
+
+.fi-wi-stats-overview-stat-description {
+    font-size: 0.75rem !important;
+}
+
+/* ===== Tables ===== */
+.fi-ta-table thead th {
+    background: var(--ks-table-head) !important;
+    font-size: 0.7rem !important;
+    font-weight: 800 !important;
+    letter-spacing: 0.05em !important;
+    text-transform: uppercase !important;
+    color: var(--ks-muted) !important;
+}
+
+.fi-ta-table tbody tr {
+    transition: background-color 120ms ease;
+}
+
+.fi-ta-table tbody tr:hover {
+    background: rgb(0 51 153 / 0.03) !important;
+}
+
+.dark .fi-ta-table tbody tr:hover {
+    background: rgb(148 163 184 / 0.08) !important;
+}
+
+.fi-ta-actions .fi-btn,
+.fi-ac .fi-btn {
+    border-radius: 0.65rem !important;
+}
+
+/* ===== Forms / inputs ===== */
+.fi-input-wrp,
+.fi-select-input,
+.fi-ta-search-field .fi-input-wrp {
+    border-radius: 0.75rem !important;
+    transition: box-shadow 140ms ease, border-color 140ms ease !important;
+    background-color: var(--ks-card) !important;
+    border-color: var(--ks-border) !important;
+}
+
+.dark .fi-input-wrp,
+.dark .fi-select-input,
+.dark .fi-ta-search-field .fi-input-wrp {
+    background-color: rgb(15 23 42 / 0.85) !important;
+}
+
+.fi-input,
+.fi-select-input,
+textarea.fi-input {
+    color: var(--ks-ink) !important;
+}
+
+.fi-input::placeholder {
+    color: var(--ks-muted) !important;
+}
+
+.fi-input-wrp:focus-within {
+    box-shadow: 0 0 0 3px rgb(0 51 153 / 0.12) !important;
+    border-color: var(--ks-brand) !important;
+}
+
+.dark .fi-input-wrp:focus-within {
+    box-shadow: 0 0 0 3px rgb(96 165 250 / 0.2) !important;
+    border-color: #60a5fa !important;
+}
+
+.fi-fo-field-wrp-label span,
+.fi-fo-field-wrp-label label {
+    color: var(--ks-ink);
+}
+
+.fi-fo-field-wrp-hint,
+.fi-fo-field-wrp-helper-text {
+    color: var(--ks-muted) !important;
+}
+
+.fi-btn {
+    border-radius: 0.7rem !important;
+    font-weight: 700 !important;
+}
+
+.fi-btn-primary {
+    box-shadow: 0 8px 18px -12px rgb(0 51 153 / 0.7) !important;
+}
+
+/* ===== Modals / dropdowns / notifications / search ===== */
+.fi-modal-window,
+.fi-dropdown-panel,
+.fi-global-search-results-ctn {
+    background: var(--ks-card) !important;
+    border: 1px solid var(--ks-border) !important;
+    color: var(--ks-ink) !important;
+    box-shadow: var(--ks-shadow) !important;
+}
+
+.fi-modal-header,
+.fi-modal-footer {
+    background: var(--ks-header-bg) !important;
+    border-color: var(--ks-header-border) !important;
+}
+
+.fi-modal-heading {
+    color: var(--ks-ink) !important;
+}
+
+.fi-modal-description {
+    color: var(--ks-muted) !important;
+}
+
+.fi-no-notification {
+    background: var(--ks-card) !important;
+    border: 1px solid var(--ks-border) !important;
+    color: var(--ks-ink) !important;
+}
+
+/* ===== Pagination / empty / filters ===== */
+.fi-pagination,
+.fi-ta-empty-state-heading,
+.fi-section-content,
+.fi-ta-filters {
+    color: var(--ks-ink);
+}
+
+.fi-ta-empty-state-description,
+.fi-pagination-overview {
+    color: var(--ks-muted) !important;
+}
+
+.fi-ta-ctn {
+    color: var(--ks-ink);
+}
+
+/* ===== Breadcrumbs / tabs ===== */
+.fi-breadcrumbs {
+    font-size: 0.78rem !important;
+    color: var(--ks-muted) !important;
+}
+
+.fi-breadcrumbs-item-label {
+    color: inherit !important;
+}
+
+.fi-tabs {
+    background: transparent !important;
+}
+
+.fi-tabs-item {
+    border-radius: 0.65rem !important;
+    font-weight: 650 !important;
+    color: var(--ks-muted) !important;
+}
+
+.fi-tabs-item.fi-active,
+.fi-tabs-item[aria-selected="true"] {
+    color: var(--ks-ink) !important;
+    background: var(--ks-card) !important;
+}
+
+.dark .fi-tabs-item.fi-active,
+.dark .fi-tabs-item[aria-selected="true"] {
+    background: rgb(30 41 59 / 0.9) !important;
+    color: #f1f5f9 !important;
+}
+
+/* ===== Login / simple layout ===== */
+.fi-simple-layout {
+    background:
+        radial-gradient(900px 420px at 10% 0%, rgb(0 51 153 / 0.18), transparent 55%),
+        radial-gradient(700px 360px at 90% 10%, rgb(249 115 22 / 0.16), transparent 50%),
+        linear-gradient(180deg, #001a4d 0%, #003399 42%, #f3f5f9 42%, #f3f5f9 100%) !important;
+    min-height: 100vh;
+}
+
+.dark .fi-simple-layout {
+    background:
+        radial-gradient(900px 420px at 10% 0%, rgb(0 51 153 / 0.28), transparent 55%),
+        radial-gradient(700px 360px at 90% 10%, rgb(249 115 22 / 0.18), transparent 50%),
+        linear-gradient(180deg, #001a4d 0%, #003399 42%, #0b1220 42%, #0b1220 100%) !important;
+}
+
+.fi-simple-main {
+    padding-top: 2.5rem !important;
+    padding-bottom: 2.5rem !important;
+}
+
+.fi-simple-card {
+    border-radius: 1.25rem !important;
+    border: 1px solid rgb(255 255 255 / 0.55) !important;
+    box-shadow: 0 24px 50px -28px rgb(0 26 77 / 0.55) !important;
+    background: var(--ks-card) !important;
+}
+
+.dark .fi-simple-card {
+    border-color: rgb(51 65 85 / 0.9) !important;
+}
+
+.fi-logo {
+    filter: drop-shadow(0 6px 14px rgb(0 0 0 / 0.18));
+}
+
+.fi-logo .ks-brand-logo {
+    height: 100%;
+    width: auto;
+    max-width: min(280px, 70vw);
+    object-fit: contain;
+    object-position: left center;
+}
+
+/* Default / login (latar terang): logo terang */
+.fi-logo .ks-brand-logo--light {
+    display: block;
+}
+
+.fi-logo .ks-brand-logo--dark {
+    display: none;
+}
+
+/* Sidebar header + topbar selalu biru gelap → logo dark */
+.fi-sidebar-header .ks-brand-logo--light,
+.fi-topbar .ks-brand-logo--light {
+    display: none;
+}
+
+.fi-sidebar-header .ks-brand-logo--dark,
+.fi-topbar .ks-brand-logo--dark {
+    display: block;
+}
+
+/* Filament dark mode di mana saja */
+.dark .fi-logo .ks-brand-logo--light {
+    display: none;
+}
+
+.dark .fi-logo .ks-brand-logo--dark {
+    display: block;
+}
+
+/* Login simple layout: paksa logo terang (card/area putih) */
+.fi-simple-layout .ks-brand-logo--light {
+    display: block !important;
+}
+
+.fi-simple-layout .ks-brand-logo--dark {
+    display: none !important;
+}
+
+.dark .fi-simple-layout .ks-brand-logo--light {
+    display: none !important;
+}
+
+.dark .fi-simple-layout .ks-brand-logo--dark {
+    display: block !important;
+}
+
+/* ===== Preview CTA ===== */
+#btn-lihat-situs {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    margin-right: 0.15rem;
+    padding: 0.35rem 0.9rem;
+    border: 1px solid rgba(255, 255, 255, 0.4);
+    border-radius: 9999px;
+    font-size: 11px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: #ffffff !important;
+    background: rgb(255 255 255 / 0.08);
+    transition: all 150ms ease;
+}
+
+#btn-lihat-situs:hover {
+    background: var(--ks-accent-soft);
+    border-color: var(--ks-accent-soft);
+    color: #111111 !important;
+}
+
+#preview-modal {
+    display: none;
+    position: fixed;
+    inset: 0;
+    z-index: 99999;
+    background: rgba(0, 0, 0, 0.65);
+    align-items: center;
+    justify-content: center;
+    padding: 2rem;
+}
+
+/* List berita: baris lebih lega ala newsroom */
+.fi-resource-posts .fi-ta-record {
+    vertical-align: middle;
+}
+
+.fi-resource-posts .fi-ta-text-item-label {
+    font-size: 0.95rem;
+    line-height: 1.35;
+}
+
+/* Create / edit berita: editor nyaman, sidebar meta rapat */
+.fi-resource-posts .fi-fo-rich-editor .fi-fo-rich-editor-main,
+.fi-resource-create-record-post .fi-fo-rich-editor .fi-fo-rich-editor-main,
+.fi-resource-edit-record-post .fi-fo-rich-editor .fi-fo-rich-editor-main {
+    min-height: 22rem;
+}
+
+.fi-resource-create-record-post .fi-section,
+.fi-resource-edit-record-post .fi-section {
+    scroll-margin-top: 5rem;
+}
+
+@media (max-width: 1023px) {
+    .fi-resource-create-record-post .fi-page-content,
+    .fi-resource-edit-record-post .fi-page-content {
+        gap: 1rem !important;
+    }
+}
+
+#preview-panel {
+    display: flex;
+    flex-direction: column;
+    width: min(1100px, 94vw);
+    height: 90vh;
+    background: var(--ks-card);
+    border-radius: 14px;
+    overflow: hidden;
+    box-shadow: 0 25px 60px rgba(0, 0, 0, 0.35);
+}
+
+#preview-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.65rem 1rem;
+    background: linear-gradient(90deg, var(--ks-brand), var(--ks-brand-dark));
+    color: #ffffff;
+    font-size: 12px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    border-bottom: 3px solid var(--ks-accent-soft);
+}
+
+#preview-header a,
+#preview-header button {
+    color: #ffffff !important;
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 12px;
+    font-weight: 700;
+}
+
+#preview-header a:hover,
+#preview-header button:hover {
+    color: var(--ks-accent-soft) !important;
+}
+
+#preview-actions {
+    display: inline-flex;
+    gap: 1rem;
+    align-items: center;
+}
+
+#preview-frame {
+    flex: 1;
+    width: 100%;
+    border: 0;
+    background: var(--ks-surface);
+}
+
+/* ===== Empty / comfort spacing ===== */
+.fi-page-content {
+    gap: 1.25rem !important;
+}
+
+.fi-page-header {
+    margin-bottom: 0.35rem !important;
+}
+
+/* Custom hub tables inherit ink/muted on both modes */
+.fi-page table {
+    color: var(--ks-ink);
+}
+
+@media (max-width: 768px) {
+    .fi-wi-stats-overview-stat-value {
+        font-size: 1.3rem !important;
+    }
+
+    #btn-lihat-situs span,
+    #btn-lihat-situs {
+        font-size: 10px;
+        padding: 0.3rem 0.65rem;
+    }
+}

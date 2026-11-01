@@ -4,24 +4,78 @@ namespace App\Filament\Resources;
 
 use App\Filament\Resources\PostResource\Pages;
 use App\Models\Post;
+use App\Support\AutoRelatedPosts;
+use App\Support\EditorialInsights;
 use App\Support\PostSlug;
+use App\Support\RedakturOperationalRecap;
+use App\Support\SeoAnalyzer;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Forms\Get;
 use Filament\Forms\Set;
+use Filament\Navigation\NavigationItem;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\HtmlString;
 
 class PostResource extends Resource
 {
     protected static ?string $model = Post::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+    protected static ?string $navigationIcon = 'heroicon-o-newspaper';
+
+    protected static ?string $navigationLabel = 'Berita';
+
+    protected static ?string $modelLabel = 'Berita';
+
+    protected static ?string $pluralModelLabel = 'Berita';
+
+    protected static ?string $navigationGroup = 'Redaksi';
+
+    protected static ?int $navigationSort = 10;
+
+    public static function canViewAny(): bool
+    {
+        return auth()->user()?->canAccess('manage_posts') ?? false;
+    }
+
+    public static function getEloquentQuery(): Builder
+    {
+        return parent::getEloquentQuery()
+            ->with(['user:id,name', 'categories:id,name']);
+    }
+
+    public static function pendingReviewCount(): int
+    {
+        return (int) Cache::remember('admin.posts.pending_review_count', 30, function () {
+            return Post::query()->where('status', 'Menunggu Review')->count();
+        });
+    }
+
+    public static function forgetPendingReviewCount(): void
+    {
+        Cache::forget('admin.posts.pending_review_count');
+        Cache::forget('admin.posts.status_tabs');
+        Cache::forget('admin.editorial_queue');
+        Cache::forget('admin.stats_overview');
+        Cache::forget('admin.views_chart_7d');
+        Cache::forget('admin.business_stats.v2');
+        Cache::forget('admin.popular_posts_top5');
+        Cache::forget('admin.redaktur_performance.'.now()->toDateString());
+        RedakturOperationalRecap::forgetCache();
+        EditorialInsights::forgetCache();
+    }
 
     public static function getNavigationBadge(): ?string
     {
-        $pending = Post::where('status', 'Menunggu Review')->count();
+        if (! static::canViewAny()) {
+            return null;
+        }
+
+        $pending = static::pendingReviewCount();
 
         return $pending > 0 ? (string) $pending : null;
     }
@@ -31,119 +85,280 @@ class PostResource extends Resource
         return 'warning';
     }
 
+    public static function getNavigationItems(): array
+    {
+        if (! static::canViewAny()) {
+            return [];
+        }
+
+        $items = parent::getNavigationItems();
+        $pending = static::pendingReviewCount();
+
+        $items[] = NavigationItem::make('Antrian Kontributor')
+            ->icon('heroicon-o-inbox-stack')
+            ->group(static::getNavigationGroup())
+            ->sort(11)
+            ->badge($pending > 0 ? (string) $pending : null, 'warning')
+            ->url(static::getUrl('queue'))
+            ->isActiveWhen(fn (): bool => request()->routeIs(static::getRouteBaseName().'.queue'));
+
+        return $items;
+    }
+
     public static function form(Form $form): Form
     {
         return $form
             ->schema([
-                Forms\Components\Select::make('user_id')
-                    ->relationship('user', 'name')
-                    ->searchable()
-                    ->preload(),
-                Forms\Components\TextInput::make('penulis')
-                    ->label('Penulis')
-                    ->placeholder('Contoh: Ahmad Fauzi'),
-                Forms\Components\TextInput::make('editor')
-                    ->label('Editor')
-                    ->placeholder('Contoh: Tim Redaksi'),
-                Forms\Components\Section::make('Kontributor (Kiriman Publik)')
-                    ->columns(3)
-                    ->visible(fn (callable $get): bool => $get('status') === 'Menunggu Review')
-                    ->schema([
-                        Forms\Components\TextInput::make('author_name')
-                            ->label('Nama Kontributor'),
-                        Forms\Components\TextInput::make('author_wa')
-                            ->label('No. WA Kontributor'),
-                        Forms\Components\TextInput::make('author_instansi')
-                            ->label('Instansi Kontributor'),
-                    ]),
-                Forms\Components\Select::make('categories')
-                    ->label('Kanal')
-                    ->relationship('categories', 'name')
-                    ->multiple()
-                    ->preload(),
-                Forms\Components\Select::make('relatedPosts')
-                    ->relationship('relatedPosts', 'title', fn ($query) => $query->where('status', 'Published'))
-                    ->multiple()
-                    ->preload()
-                    ->searchable()
-                    ->label('Berita Terkait (Baca Juga)')
-                    ->columnSpanFull(),
-                Forms\Components\TextInput::make('title')
-                    ->required()
-                    ->live(onBlur: true)
-                    ->afterStateUpdated(function (Set $set, Get $get, ?string $state, Forms\Components\TextInput $component): void {
-                        if (blank($state)) {
-                            return;
-                        }
+                Forms\Components\Grid::make([
+                    'default' => 1,
+                    'lg' => 3,
+                ])->schema([
+                    Forms\Components\Group::make([
+                        Forms\Components\Section::make('Naskah')
+                            ->description('Judul, ringkasan, dan isi artikel.')
+                            ->schema([
+                                Forms\Components\TextInput::make('title')
+                                    ->label('Judul')
+                                    ->required()
+                                    ->maxLength(180)
+                                    ->live(onBlur: true)
+                                    ->afterStateUpdated(function (Set $set, Get $get, ?string $state, Forms\Components\TextInput $component): void {
+                                        if (blank($state)) {
+                                            return;
+                                        }
 
-                        $record = $component->getRecord();
+                                        $record = $component->getRecord();
 
-                        // Saat edit, jangan timpa slug yang sudah bersih (hindari ubah URL tanpa sengaja).
-                        if ($record && filled($get('slug')) && PostSlug::isClean($get('slug'))) {
-                            return;
-                        }
+                                        if ($record && filled($get('slug')) && PostSlug::isClean($get('slug'))) {
+                                            return;
+                                        }
 
-                        $set('slug', PostSlug::unique($state, $record?->getKey()));
-                    }),
-                Forms\Components\TextInput::make('slug')
-                    ->required()
-                    ->unique(ignoreRecord: true)
-                    ->helperText('Otomatis dari judul (huruf kecil + strip). Bisa diedit manual.'),
-                Forms\Components\FileUpload::make('image_url')
-                    ->label('Gambar Utama')
-                    ->image()
-                    ->disk(fn () => media_disk())
-                    ->directory('posts')
-                    ->visibility('public')
-                    ->acceptedFileTypes(['image/jpeg', 'image/png', 'image/webp'])
-                    ->maxSize(2048)
-                    ->imageResizeMode('cover')
-                    ->imageCropAspectRatio('16:9')
-                    ->imageResizeTargetWidth('1200')
-                    ->imageResizeTargetHeight('675')
-                    ->helperText('Maks. 2MB. Otomatis dipotong 16:9 dan di-resize ke 1200×675. Disimpan ke disk media (lokal/CDN).'),
-                Forms\Components\TextInput::make('image_caption')
-                    ->label('Caption Gambar Utama')
-                    ->placeholder('Contoh: Foto: Dok. PMII Walisongo')
-                    ->helperText('Tampil di bawah gambar utama pada halaman berita'),
-                Forms\Components\Textarea::make('excerpt')
-                    ->columnSpanFull(),
-                Forms\Components\RichEditor::make('content')
-                    ->columnSpanFull()
-                    ->helperText('Caption gambar: ketik teks pada baris tepat di bawah gambar (maks. ±150 karakter), otomatis tampil sebagai caption.'),
-                Forms\Components\Select::make('status')
-                    ->options([
-                        'Menunggu Review' => 'Menunggu Review',
-                        'Draft' => 'Draft',
-                        'Published' => 'Published',
-                        'Archived' => 'Archived',
-                    ])
-                    ->required()
-                    ->default('Draft'),
-                Forms\Components\TextInput::make('views_count')
-                    ->numeric()
-                    ->default(0)
-                    ->disabled()
-                    ->dehydrated(false)
-                    ->helperText('Otomatis bertambah saat dibaca pembaca'),
-                Forms\Components\DateTimePicker::make('published_at')
-                    ->default(now())
-                    ->seconds(false),
+                                        $set('slug', PostSlug::unique($state, $record?->getKey()));
+                                    }),
+                                Forms\Components\TextInput::make('slug')
+                                    ->required()
+                                    ->maxLength(180)
+                                    ->live(onBlur: true)
+                                    ->unique(ignoreRecord: true)
+                                    ->helperText('Otomatis dari judul. Boleh diedit manual.'),
+                                Forms\Components\Textarea::make('excerpt')
+                                    ->label('Ringkasan / meta deskripsi')
+                                    ->rows(3)
+                                    ->helperText('Ideal 120–165 karakter untuk Google & share.')
+                                    ->live(onBlur: true)
+                                    ->columnSpanFull(),
+                                Forms\Components\RichEditor::make('content')
+                                    ->label('Isi berita')
+                                    ->columnSpanFull()
+                                    ->toolbarButtons([
+                                        'attachFiles',
+                                        'blockquote',
+                                        'bold',
+                                        'bulletList',
+                                        'h2',
+                                        'h3',
+                                        'italic',
+                                        'link',
+                                        'orderedList',
+                                        'redo',
+                                        'strike',
+                                        'underline',
+                                        'undo',
+                                    ])
+                                    ->helperText('Pakai Heading 2/3 untuk subjudul. Caption gambar: teks di baris tepat di bawah gambar.'),
+                            ]),
+                        Forms\Components\Section::make('Analisa SEO')
+                            ->description('Diperbarui saat Anda keluar dari judul, slug, atau ringkasan.')
+                            ->schema([
+                                Forms\Components\Placeholder::make('seo_analysis')
+                                    ->hiddenLabel()
+                                    ->content(function (Get $get): HtmlString {
+                                        $analysis = SeoAnalyzer::analyze(
+                                            $get('title'),
+                                            $get('slug'),
+                                            $get('excerpt'),
+                                            $get('content'),
+                                            $get('image_url'),
+                                        );
+
+                                        return new HtmlString(
+                                            view('filament.forms.seo-analysis', compact('analysis'))->render()
+                                        );
+                                    }),
+                            ]),
+                    ])->columnSpan(['lg' => 2]),
+
+                    Forms\Components\Group::make([
+                        Forms\Components\Section::make('Publikasi')
+                            ->schema([
+                                Forms\Components\Select::make('status')
+                                    ->options([
+                                        'Menunggu Review' => 'Menunggu Review',
+                                        'Draft' => 'Draft',
+                                        'Published' => 'Published',
+                                        'Archived' => 'Archived',
+                                    ])
+                                    ->required()
+                                    ->native(false)
+                                    ->live()
+                                    ->default('Draft'),
+                                Forms\Components\DateTimePicker::make('published_at')
+                                    ->label('Jadwal tayang')
+                                    ->default(now())
+                                    ->seconds(false)
+                                    ->native(false),
+                                Forms\Components\Select::make('categories')
+                                    ->label('Kanal')
+                                    ->relationship('categories', 'name')
+                                    ->multiple()
+                                    ->preload()
+                                    ->searchable()
+                                    ->native(false),
+                                Forms\Components\TextInput::make('views_count')
+                                    ->label('Views')
+                                    ->numeric()
+                                    ->default(0)
+                                    ->disabled()
+                                    ->dehydrated(false)
+                                    ->visibleOn('edit'),
+                            ]),
+                        Forms\Components\Section::make('Gambar utama')
+                            ->schema([
+                                Forms\Components\FileUpload::make('image_url')
+                                    ->hiddenLabel()
+                                    ->image()
+                                    ->disk(fn () => media_disk())
+                                    ->directory('posts')
+                                    ->visibility('public')
+                                    ->acceptedFileTypes(['image/jpeg', 'image/png', 'image/webp'])
+                                    ->maxSize(2048)
+                                    ->imageResizeMode('cover')
+                                    ->imageCropAspectRatio('16:9')
+                                    ->imageResizeTargetWidth('1200')
+                                    ->imageResizeTargetHeight('675')
+                                    ->helperText('Maks. 2MB · 16:9 · 1200×675'),
+                                Forms\Components\TextInput::make('image_caption')
+                                    ->label('Caption')
+                                    ->placeholder('Contoh: Foto: Dok. PMII Walisongo'),
+                            ]),
+                        Forms\Components\Section::make('Penulis & editor')
+                            ->collapsed()
+                            ->schema([
+                                Forms\Components\Select::make('user_id')
+                                    ->label('Akun redaksi')
+                                    ->relationship('user', 'name')
+                                    ->searchable()
+                                    ->default(fn () => auth()->id())
+                                    ->native(false),
+                                Forms\Components\TextInput::make('penulis')
+                                    ->label('Nama penulis (byline)')
+                                    ->placeholder('Contoh: Ahmad Fauzi'),
+                                Forms\Components\TextInput::make('editor')
+                                    ->label('Editor')
+                                    ->placeholder('Contoh: Tim Redaksi'),
+                            ]),
+                        Forms\Components\Section::make('Kontributor')
+                            ->columns(1)
+                            ->collapsed()
+                            ->visible(fn (Get $get): bool => $get('status') === 'Menunggu Review')
+                            ->schema([
+                                Forms\Components\TextInput::make('author_name')
+                                    ->label('Nama kontributor'),
+                                Forms\Components\TextInput::make('author_wa')
+                                    ->label('No. WA'),
+                                Forms\Components\TextInput::make('author_instansi')
+                                    ->label('Instansi'),
+                            ]),
+                        Forms\Components\Section::make('Baca Juga')
+                            ->description('Otomatis dari kanal & berita terbaru.')
+                            ->collapsed()
+                            ->schema([
+                                Forms\Components\Placeholder::make('related_posts_auto')
+                                    ->hiddenLabel()
+                                    ->content(function (?Post $record): HtmlString {
+                                        if (! $record?->exists) {
+                                            return new HtmlString(
+                                                '<p class="text-sm text-gray-600 dark:text-gray-300">Sistem memilih <strong>3 berita terkait</strong> saat disimpan.</p>'
+                                            );
+                                        }
+
+                                        $items = AutoRelatedPosts::previewFor($record);
+                                        if ($items->isEmpty()) {
+                                            return new HtmlString(
+                                                '<p class="text-sm text-amber-700 dark:text-amber-300">Belum ada kandidat. Simpan ulang setelah ada berita lain yang tayang.</p>'
+                                            );
+                                        }
+
+                                        $lis = $items->map(fn (Post $p) => '<li class="truncate">'.e($p->title).'</li>')->implode('');
+
+                                        return new HtmlString(
+                                            '<ol class="list-decimal space-y-1 pl-5 text-sm font-medium text-gray-800 dark:text-gray-100">'.$lis.'</ol>'
+                                        );
+                                    }),
+                            ]),
+                    ])->columnSpan(['lg' => 1]),
+                ]),
             ]);
     }
 
     public static function table(Table $table): Table
     {
         return $table
+            ->defaultSort('updated_at', 'desc')
+            ->defaultPaginationPageOption(15)
+            ->paginated([10, 15, 25, 50])
+            ->deferLoading()
+            ->striped()
+            ->persistSearchInSession()
+            ->persistFiltersInSession()
+            ->searchPlaceholder('Cari judul atau slug…')
+            ->modifyQueryUsing(function (Builder $query): Builder {
+                $tableName = $query->getModel()->getTable();
+
+                // List tidak butuh kolom content (HTML besar) — hemat memori & Livewire.
+                return $query->select([
+                    "{$tableName}.id",
+                    "{$tableName}.user_id",
+                    "{$tableName}.penulis",
+                    "{$tableName}.author_name",
+                    "{$tableName}.title",
+                    "{$tableName}.slug",
+                    "{$tableName}.image_url",
+                    "{$tableName}.status",
+                    "{$tableName}.views_count",
+                    "{$tableName}.published_at",
+                    "{$tableName}.updated_at",
+                    "{$tableName}.created_at",
+                ]);
+            })
             ->columns([
-                Tables\Columns\TextColumn::make('user.name')
-                    ->sortable(),
-                Tables\Columns\TextColumn::make('title')
-                    ->searchable(),
-                Tables\Columns\TextColumn::make('slug')
-                    ->searchable(),
                 Tables\Columns\ImageColumn::make('image_url')
-                    ->disk(fn () => media_disk()),
+                    ->label('')
+                    ->disk(fn () => media_disk())
+                    ->height(48)
+                    ->width(76)
+                    ->extraImgAttributes([
+                        'class' => 'rounded-md object-cover ring-1 ring-slate-200/80 dark:ring-white/10',
+                        'loading' => 'lazy',
+                        'decoding' => 'async',
+                    ])
+                    ->defaultImageUrl('https://placehold.co/152x96/e2e8f0/64748b?text=KS'),
+                Tables\Columns\TextColumn::make('title')
+                    ->label('Berita')
+                    ->searchable()
+                    ->sortable()
+                    ->wrap()
+                    ->limit(90)
+                    ->weight('bold')
+                    ->description(function (Post $record): string {
+                        $kanal = $record->categories->pluck('name')->filter()->join(', ');
+                        $author = $record->displayAuthorName();
+
+                        return collect([
+                            $kanal !== '' ? $kanal : 'Tanpa kanal',
+                            $author,
+                        ])->join(' · ');
+                    }),
                 Tables\Columns\TextColumn::make('status')
                     ->badge()
                     ->color(fn (string $state): string => match ($state) {
@@ -153,20 +368,35 @@ class PostResource extends Resource
                         'Archived' => 'danger',
                         default => 'gray',
                     })
-                    ->searchable(),
+                    ->icon(fn (string $state): string => match ($state) {
+                        'Menunggu Review' => 'heroicon-m-clock',
+                        'Draft' => 'heroicon-m-pencil-square',
+                        'Published' => 'heroicon-m-check-badge',
+                        'Archived' => 'heroicon-m-archive-box',
+                        default => 'heroicon-m-document',
+                    })
+                    ->sortable(),
                 Tables\Columns\TextColumn::make('views_count')
+                    ->label('Views')
                     ->numeric()
-                    ->sortable(),
+                    ->sortable()
+                    ->alignEnd()
+                    ->icon('heroicon-m-eye')
+                    ->toggleable(),
                 Tables\Columns\TextColumn::make('published_at')
-                    ->dateTime()
-                    ->sortable(),
-                Tables\Columns\TextColumn::make('created_at')
-                    ->dateTime()
+                    ->label('Tayang')
+                    ->since()
+                    ->dateTimeTooltip('d M Y H:i')
+                    ->sortable()
+                    ->placeholder('—')
+                    ->toggleable(),
+                Tables\Columns\TextColumn::make('updated_at')
+                    ->label('Diubah')
+                    ->since()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
-                Tables\Columns\TextColumn::make('updated_at')
-                    ->dateTime()
-                    ->sortable()
+                Tables\Columns\TextColumn::make('slug')
+                    ->searchable()
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
@@ -177,51 +407,82 @@ class PostResource extends Resource
                         'Published' => 'Published',
                         'Archived' => 'Archived',
                     ]),
+                Tables\Filters\SelectFilter::make('categories')
+                    ->label('Kanal')
+                    ->relationship('categories', 'name')
+                    ->multiple()
+                    ->preload(),
             ])
+            ->filtersFormColumns(2)
             ->actions([
-                Tables\Actions\Action::make('setujui')
-                    ->label('Setujui')
-                    ->icon('heroicon-m-check-circle')
-                    ->color('success')
-                    ->requiresConfirmation()
-                    ->modalDescription('Artikel akan langsung tayang atas nama kontributor.')
-                    ->visible(fn (Post $record): bool => $record->status === 'Menunggu Review')
-                    ->action(function (Post $record): void {
-                        $record->update([
-                            'status' => 'Published',
-                            'penulis' => $record->author_name ?: ($record->penulis ?: 'Kontributor'),
-                            'editor' => auth()->user()?->name,
-                            'published_at' => now(),
-                        ]);
-                    }),
-                Tables\Actions\Action::make('tolak')
-                    ->label('Tolak')
-                    ->icon('heroicon-m-x-circle')
-                    ->color('danger')
-                    ->requiresConfirmation()
-                    ->modalDescription('Kiriman ini beserta gambarnya akan dihapus permanen.')
-                    ->visible(fn (Post $record): bool => $record->status === 'Menunggu Review')
-                    ->action(fn (Post $record) => $record->delete()),
-                Tables\Actions\EditAction::make(),
+                Tables\Actions\EditAction::make()
+                    ->label('Edit')
+                    ->iconButton()
+                    ->tooltip('Edit berita'),
+                Tables\Actions\ActionGroup::make([
+                    Tables\Actions\Action::make('setujui')
+                        ->label('Setujui & Tayangkan')
+                        ->icon('heroicon-m-check-circle')
+                        ->color('success')
+                        ->requiresConfirmation()
+                        ->modalDescription('Artikel akan langsung tayang atas nama kontributor.')
+                        ->visible(fn (Post $record): bool => $record->status === 'Menunggu Review')
+                        ->action(function (Post $record): void {
+                            $record->update([
+                                'status' => 'Published',
+                                'penulis' => $record->author_name ?: ($record->penulis ?: 'Kontributor'),
+                                'editor' => auth()->user()?->name,
+                                'published_at' => now(),
+                            ]);
+                            AutoRelatedPosts::syncFor($record->fresh(['categories']));
+                            static::forgetPendingReviewCount();
+                        }),
+                    Tables\Actions\Action::make('tolak')
+                        ->label('Tolak & Hapus')
+                        ->icon('heroicon-m-x-circle')
+                        ->color('danger')
+                        ->requiresConfirmation()
+                        ->modalDescription('Kiriman ini beserta gambarnya akan dihapus permanen.')
+                        ->visible(fn (Post $record): bool => $record->status === 'Menunggu Review')
+                        ->action(function (Post $record): void {
+                            $record->delete();
+                            static::forgetPendingReviewCount();
+                        }),
+                    Tables\Actions\Action::make('lihat')
+                        ->label('Lihat di situs')
+                        ->icon('heroicon-m-arrow-top-right-on-square')
+                        ->url(fn (Post $record): string => route('news.show', $record->slug))
+                        ->openUrlInNewTab()
+                        ->visible(fn (Post $record): bool => $record->status === 'Published'),
+                ])
+                    ->icon('heroicon-m-ellipsis-vertical')
+                    ->iconButton()
+                    ->tooltip('Aksi lain'),
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\DeleteBulkAction::make(),
+                    Tables\Actions\DeleteBulkAction::make()
+                        ->after(fn () => static::forgetPendingReviewCount()),
                 ]),
+            ])
+            ->emptyStateHeading('Belum ada berita')
+            ->emptyStateDescription('Buat berita baru atau tinjau antrian kontributor.')
+            ->emptyStateIcon('heroicon-o-newspaper')
+            ->emptyStateActions([
+                Tables\Actions\CreateAction::make()->label('Tulis Berita'),
             ]);
     }
 
     public static function getRelations(): array
     {
-        return [
-            //
-        ];
+        return [];
     }
 
     public static function getPages(): array
     {
         return [
             'index' => Pages\ListPosts::route('/'),
+            'queue' => Pages\ListContributorQueue::route('/antrian'),
             'create' => Pages\CreatePost::route('/create'),
             'edit' => Pages\EditPost::route('/{record}/edit'),
         ];

@@ -14,11 +14,20 @@ class CategoryResource extends Resource
 {
     protected static ?string $model = Category::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+    protected static ?string $navigationIcon = 'heroicon-o-tag';
 
     protected static ?string $modelLabel = 'Kanal';
 
     protected static ?string $pluralModelLabel = 'Kanal';
+
+    protected static ?string $navigationGroup = 'Redaksi';
+
+    protected static ?int $navigationSort = 20;
+
+    public static function canViewAny(): bool
+    {
+        return auth()->user()?->canAccess('manage_categories') ?? false;
+    }
 
     public static function form(Form $form): Form
     {

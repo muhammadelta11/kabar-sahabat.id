@@ -32,13 +32,15 @@ class NewsController extends Controller
             });
         }
 
-        $posts = $query->paginate(15)->withQueryString();
+        // Beranda: page 1 lebih padat (setara ~2 halaman lama), lalu lanjut page 2+.
+        $perPage = ($request->filled('category') || $request->filled('q')) ? 15 : 30;
+        $posts = $query->paginate($perPage)->withQueryString();
 
         return view('news.index', [
             'posts' => $posts,
-            'latestPosts' => NewsCache::latestPosts(12),
+            'latestPosts' => NewsCache::latestPosts(24),
             'trendingPosts' => NewsCache::trendingPosts(10),
-            'popularPosts' => NewsCache::popularPosts(7),
+            'popularPosts' => NewsCache::popularPosts(5),
             'homeSections' => NewsCache::homeSections(),
             'ads' => NewsCache::activeAds(),
         ]);
@@ -70,18 +72,18 @@ class NewsController extends Controller
         $bacaJugaPosts = $post->relatedPosts()
             ->with(['categories:id,name,slug'])
             ->where('status', 'Published')
-            ->limit(2)
+            ->limit(3)
             ->get();
 
-        if ($bacaJugaPosts->count() < 2) {
-            $needed = 2 - $bacaJugaPosts->count();
+        if ($bacaJugaPosts->count() < 3) {
+            $needed = 3 - $bacaJugaPosts->count();
             $excludeIds = array_merge([$post->id], $bacaJugaPosts->pluck('id')->all());
 
             $randomPosts = Post::query()
                 ->with(['categories:id,name,slug'])
                 ->published()
                 ->whereNotIn('id', $excludeIds)
-                ->inRandomOrder()
+                ->latest('published_at')
                 ->limit($needed)
                 ->get();
 

@@ -1,4 +1,7 @@
 <x-filament-panels::page>
+    <div class="mb-4 rounded-2xl border border-slate-200/80 bg-gradient-to-r from-[#003399]/[0.06] via-white to-orange-500/[0.06] px-4 py-3 text-sm text-slate-600 dark:border-slate-700 dark:from-[#003399]/20 dark:via-slate-900 dark:to-orange-500/10 dark:text-slate-300">
+        Kelola identitas, kontak, WhatsApp, sosial, dan analitik dalam satu tempat — perubahan langsung memengaruhi situs publik.
+    </div>
     @if(session('success'))
         <div class="fi-alert fi-alert-success mb-4 p-4 rounded-lg bg-green-50 border border-green-200 text-green-800 font-semibold text-sm">
             ✅ {{ session('success') }}
@@ -160,10 +163,48 @@
 
         {{-- ANALITIK --}}
         <x-filament::section heading="Integrasi Analitik">
-            <div>
-                <label class="block text-sm font-medium text-gray-950 dark:text-white mb-1">Kode Tracking (Google Analytics / Cloudflare)</label>
-                <p class="text-xs text-gray-500 mb-2">Tempelkan tag &lt;script&gt; lengkap dari provider analitik Anda. Kode ini akan diload di &lt;head&gt; semua halaman publik.</p>
-                <textarea name="analytics_code" rows="6" class="fi-input w-full rounded-lg border border-gray-300 px-3 py-2 text-sm font-mono shadow-sm focus:ring-2 focus:ring-primary-500 dark:bg-white/5 dark:border-white/10 dark:text-white">{{ old('analytics_code', $setting->analytics_code) }}</textarea>
+            <div class="space-y-4">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-950 dark:text-white mb-1">GA4 Measurement ID</label>
+                        <input
+                            type="text"
+                            name="ga_measurement_id"
+                            value="{{ old('ga_measurement_id', $setting->ga_measurement_id) }}"
+                            placeholder="G-XXXXXXXX"
+                            class="fi-input w-full rounded-lg border border-gray-300 px-3 py-2 text-sm font-mono shadow-sm focus:ring-2 focus:ring-primary-500 dark:bg-white/5 dark:border-white/10 dark:text-white"
+                        >
+                        @error('ga_measurement_id') <p class="text-red-500 text-xs mt-1">{{ $message }}</p> @enderror
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-950 dark:text-white mb-1">URL Dashboard GA</label>
+                        <input
+                            type="url"
+                            name="ga_dashboard_url"
+                            value="{{ old('ga_dashboard_url', $setting->ga_dashboard_url) }}"
+                            placeholder="https://analytics.google.com/analytics/web/..."
+                            class="fi-input w-full rounded-lg border border-gray-300 px-3 py-2 text-sm shadow-sm focus:ring-2 focus:ring-primary-500 dark:bg-white/5 dark:border-white/10 dark:text-white"
+                        >
+                        @error('ga_dashboard_url') <p class="text-red-500 text-xs mt-1">{{ $message }}</p> @enderror
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-950 dark:text-white mb-1">URL Embed Looker Studio (opsional)</label>
+                    <p class="text-xs text-gray-500 mb-2">Link embed laporan Looker agar tampil di Performa Redaksi / Analytics. Kosongkan jika tidak dipakai.</p>
+                    <input
+                        type="url"
+                        name="ga_looker_embed_url"
+                        value="{{ old('ga_looker_embed_url', $setting->ga_looker_embed_url) }}"
+                        placeholder="https://lookerstudio.google.com/embed/reporting/..."
+                        class="fi-input w-full rounded-lg border border-gray-300 px-3 py-2 text-sm shadow-sm focus:ring-2 focus:ring-primary-500 dark:bg-white/5 dark:border-white/10 dark:text-white"
+                    >
+                    @error('ga_looker_embed_url') <p class="text-red-500 text-xs mt-1">{{ $message }}</p> @enderror
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-950 dark:text-white mb-1">Kode Tracking tambahan (opsional)</label>
+                    <p class="text-xs text-gray-500 mb-2">Measurement ID di atas sudah memuat gtag publik. Isi field ini hanya untuk snippet ekstra (mis. Cloudflare). Jangan dobel-paste gtag GA yang sama.</p>
+                    <textarea name="analytics_code" rows="6" class="fi-input w-full rounded-lg border border-gray-300 px-3 py-2 text-sm font-mono shadow-sm focus:ring-2 focus:ring-primary-500 dark:bg-white/5 dark:border-white/10 dark:text-white">{{ old('analytics_code', $setting->analytics_code) }}</textarea>
+                </div>
             </div>
         </x-filament::section>
 

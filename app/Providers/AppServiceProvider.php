@@ -28,9 +28,13 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        if (Schema::hasTable('settings')) {
-            View::share('siteSettings', NewsCache::siteSettings());
-        }
+        View::composer('*', function ($view): void {
+            if (! Schema::hasTable('settings')) {
+                return;
+            }
+
+            $view->with('siteSettings', NewsCache::siteSettings());
+        });
 
         View::composer(['news.index', 'news.show', 'pages.*'], function ($view): void {
             $view->with(

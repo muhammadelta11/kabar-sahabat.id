@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Setting;
 use App\Support\Media;
+use App\Support\NewsCache;
 use Illuminate\Http\Request;
 
 class SettingsController extends Controller
@@ -31,6 +32,9 @@ class SettingsController extends Controller
             'threads_url' => 'nullable|url|max:255',
             'tiktok_url' => 'nullable|url|max:255',
             'analytics_code' => 'nullable|string|max:10000',
+            'ga_measurement_id' => ['nullable', 'string', 'max:32', 'regex:/^G-[A-Z0-9]+$/i'],
+            'ga_dashboard_url' => 'nullable|url|max:500',
+            'ga_looker_embed_url' => 'nullable|url|max:500',
             'logo' => 'nullable|image|max:2048',
         ]);
 
@@ -64,7 +68,14 @@ class SettingsController extends Controller
         $setting->threads_url = $request->threads_url;
         $setting->tiktok_url = $request->tiktok_url;
         $setting->analytics_code = $request->analytics_code;
+        $setting->ga_measurement_id = $request->filled('ga_measurement_id')
+            ? strtoupper((string) $request->input('ga_measurement_id'))
+            : null;
+        $setting->ga_dashboard_url = $request->input('ga_dashboard_url');
+        $setting->ga_looker_embed_url = $request->input('ga_looker_embed_url');
         $setting->save();
+
+        NewsCache::flush();
 
         return redirect()->route('filament.admin.pages.manage-settings')
             ->with('success', 'Pengaturan berhasil disimpan!');

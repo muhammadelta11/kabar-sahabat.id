@@ -26,5 +26,8 @@ class Setting extends Model
         'whatsapp_message',
         'address',
         'analytics_code',
+        'ga_measurement_id',
+        'ga_dashboard_url',
+        'ga_looker_embed_url',
     ];
 }

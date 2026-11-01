@@ -3,6 +3,7 @@
 namespace Database\Seeders;
 
 use App\Models\User;
+use App\UserRole;
 use Illuminate\Database\Seeder;
 
 class UserSeeder extends Seeder
@@ -14,16 +15,16 @@ class UserSeeder extends Seeder
             [
                 'name' => 'Super Admin',
                 'password' => bcrypt('password'),
-                'role' => 'super_admin',
+                'role' => UserRole::SuperAdmin,
             ],
         );
 
         User::firstOrCreate(
-            ['email' => 'adminkonten@mail.com'],
+            ['email' => 'redaktur@mail.com'],
             [
-                'name' => 'Admin Konten',
+                'name' => 'Redaktur',
                 'password' => bcrypt('password'),
-                'role' => 'admin_konten',
+                'role' => UserRole::Redaktur,
             ],
         );
     }

@@ -17,6 +17,13 @@ class ViewsChart extends ChartWidget
 
     protected int|string|array $columnSpan = 'full';
 
+    public static function canView(): bool
+    {
+        $user = auth()->user();
+
+        return ($user?->canAccess('view_business_dashboard') || $user?->canAccess('view_editorial_dashboard')) ?? false;
+    }
+
     protected function getData(): array
     {
         $payload = Cache::remember('admin.views_chart_7d', 120, function () {
@@ -70,12 +77,35 @@ class ViewsChart extends ChartWidget
 
     protected function getOptions(): array
     {
+        // Warna netral agar label chart terbaca di light & dark tanpa reload theme.
+        $tick = 'rgb(100, 116, 139)';
+        $grid = 'rgba(148, 163, 184, 0.25)';
+
         return [
+            'plugins' => [
+                'legend' => [
+                    'labels' => [
+                        'color' => $tick,
+                    ],
+                ],
+            ],
             'scales' => [
+                'x' => [
+                    'ticks' => [
+                        'color' => $tick,
+                    ],
+                    'grid' => [
+                        'color' => $grid,
+                    ],
+                ],
                 'y' => [
                     'beginAtZero' => true,
                     'ticks' => [
                         'precision' => 0,
+                        'color' => $tick,
+                    ],
+                    'grid' => [
+                        'color' => $grid,
                     ],
                 ],
             ],

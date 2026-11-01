@@ -80,31 +80,43 @@ class NewsCache
 
     public static function latestPosts(int $limit = 12): Collection
     {
-        return self::cachedPostCollection('news.latest_posts', $limit, function ($query) {
+        return self::cachedPostCollection('news.latest_posts.'.$limit, $limit, function ($query) {
             $query->latest('published_at');
         });
     }
 
     public static function trendingPosts(int $limit = 10): Collection
     {
-        return self::cachedPostCollection('news.trending_posts', $limit, function ($query) {
+        return self::cachedPostCollection('news.trending_posts.'.$limit, $limit, function ($query) {
             $query->orderByDesc('views_count');
         });
     }
 
     public static function popularPosts(int $limit = 7, string $cacheKey = 'news.popular_posts'): Collection
     {
-        return self::cachedPostCollection($cacheKey, $limit, function ($query) {
+        return self::cachedPostCollection($cacheKey.'.'.$limit, $limit, function ($query) {
             $query->orderByDesc('views_count');
         });
     }
 
     public static function homeSections(): Collection
     {
-        $categoryIds = self::rememberIdList('news.home_sections', function () {
-            return Category::query()
+        $categoryIds = self::rememberIdList('news.home_sections.v2', function () {
+            $ids = Category::query()
                 ->where('show_on_homepage', true)
                 ->orderBy('name')
+                ->pluck('id')
+                ->all();
+
+            if ($ids !== []) {
+                return $ids;
+            }
+
+            // Fallback: sampai 4 kanal yang punya berita, agar homepage tidak langsung footer
+            return Category::query()
+                ->whereHas('posts', fn ($q) => $q->published())
+                ->orderBy('name')
+                ->limit(4)
                 ->pluck('id')
                 ->all();
         });

@@ -6,6 +6,10 @@ use App\Models\Post;
 use Filament\Tables;
 use Filament\Tables\Table;
 use Filament\Widgets\TableWidget as BaseWidget;
+use Illuminate\Contracts\Pagination\CursorPaginator;
+use Illuminate\Contracts\Pagination\Paginator;
+use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Support\Facades\Cache;
 
 class PopularPostsTable extends BaseWidget
 {
@@ -15,28 +19,63 @@ class PopularPostsTable extends BaseWidget
 
     protected int|string|array $columnSpan = 'full';
 
+    public static function canView(): bool
+    {
+        return auth()->user()?->canAccess('view_editorial_dashboard') ?? false;
+    }
+
+    public static function cacheKey(): string
+    {
+        return 'admin.popular_posts_top5';
+    }
+
+    public static function forgetCache(): void
+    {
+        Cache::forget(static::cacheKey());
+    }
+
+    /**
+     * @return Collection<int, Post>
+     */
+    public static function cachedRows(): Collection
+    {
+        return Cache::remember(static::cacheKey(), 60, function () {
+            return Post::query()
+                ->published()
+                ->select(['id', 'title', 'views_count', 'published_at', 'status'])
+                ->orderByDesc('views_count')
+                ->limit(5)
+                ->get();
+        });
+    }
+
+    public function getTableRecords(): Collection|Paginator|CursorPaginator
+    {
+        return static::cachedRows();
+    }
+
     public function table(Table $table): Table
     {
         return $table
             ->query(
-                Post::query()->published()->limit(5)
+                Post::query()
+                    ->published()
+                    ->select(['id', 'title', 'views_count', 'published_at', 'status'])
+                    ->orderByDesc('views_count')
+                    ->limit(5)
             )
-            ->defaultSort('views_count', 'desc')
             ->paginated(false)
             ->columns([
                 Tables\Columns\TextColumn::make('title')
                     ->label('Judul Berita')
-                    ->searchable()
                     ->wrap(),
                 Tables\Columns\TextColumn::make('views_count')
                     ->label('Jumlah Pembaca (Views)')
                     ->numeric()
-                    ->sortable()
                     ->alignEnd(),
                 Tables\Columns\TextColumn::make('published_at')
                     ->label('Tanggal Terbit')
-                    ->dateTime('d M Y H:i')
-                    ->sortable(),
+                    ->dateTime('d M Y H:i'),
             ]);
     }
 }

@@ -1,10 +1,12 @@
 <?php
 
 use App\Models\Post;
+use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
 
+use function Pest\Laravel\actingAs;
 use function Pest\Laravel\post;
 
 uses(RefreshDatabase::class);
@@ -22,7 +24,17 @@ function validPayload(array $overrides = []): array
     ], $overrides);
 }
 
+function actingAsKontributor(): User
+{
+    $user = User::factory()->kontributor()->create();
+    actingAs($user);
+
+    return $user;
+}
+
 it('menyimpan kiriman valid dengan status menunggu review', function () {
+    $user = actingAsKontributor();
+
     post(route('submissions.store'), validPayload())
         ->assertRedirect(route('submissions.create'))
         ->assertSessionHas('submitted');
@@ -32,11 +44,13 @@ it('menyimpan kiriman valid dengan status menunggu review', function () {
     expect($post->status)->toBe('Menunggu Review')
         ->and($post->author_name)->toBe('Budi Kontributor')
         ->and($post->author_wa)->toBe('081234567890')
-        ->and($post->user_id)->toBeNull()
+        ->and($post->user_id)->toBe($user->id)
         ->and(mb_strlen(strip_tags($post->content)))->toBeGreaterThanOrEqual(200);
 });
 
 it('membersihkan xss dari konten kiriman', function () {
+    actingAsKontributor();
+
     $malicious = '<p>Konten awal yang panjang dan aman. </p>'
         .'<script>alert("xss")</script>'
         .'<img src="javascript:alert(1)" onerror="alert(1)">'
@@ -57,6 +71,8 @@ it('membersihkan xss dari konten kiriman', function () {
 });
 
 it('membuang img eksternal dan hanya mengizinkan path kiriman sendiri', function () {
+    actingAsKontributor();
+
     $local = '/storage/kiriman/abc123.jpg';
     $content = '<div>'
         .'<p>Berikut foto acara. '.str_repeat('Konten panjang. ', 12).'</p>'
@@ -73,6 +89,8 @@ it('membuang img eksternal dan hanya mengizinkan path kiriman sendiri', function
 });
 
 it('menormalkan url absolut milik situs menjadi path relatif', function () {
+    actingAsKontributor();
+
     $content = '<p>Paragraf pembuka artikel kontributor. '.str_repeat('Kalimat pengisi. ', 15).'</p>'
         .'<img src="https://kabarsahabat.test/storage/kiriman/namafile123.png" alt="dok">';
 
@@ -84,6 +102,8 @@ it('menormalkan url absolut milik situs menjadi path relatif', function () {
 });
 
 it('menambahkan rel noopener pada semua tautan', function () {
+    actingAsKontributor();
+
     $content = '<p>Sumber bermanfaat untuk pembaca semua. '.str_repeat('kalimat pengisi. ', 20).'</p><a href="https://contoh.org">tautan</a>';
 
     post(route('submissions.store'), validPayload(['content' => $content]));
@@ -92,6 +112,8 @@ it('menambahkan rel noopener pada semua tautan', function () {
 });
 
 it('membuang kiriman honeypot tanpa jejak', function () {
+    actingAsKontributor();
+
     post(route('submissions.store'), validPayload(['website' => 'http://spam.bot']))
         ->assertRedirect(route('submissions.create'));
 
@@ -99,6 +121,8 @@ it('membuang kiriman honeypot tanpa jejak', function () {
 });
 
 it('membatasi frekuensi pengiriman per ip', function () {
+    actingAsKontributor();
+
     foreach ([1, 2, 3] as $i) {
         post(route('submissions.store'), validPayload(['title' => "Judul Artikel Kiriman Nomor {$i}"]))
             ->assertRedirect();
@@ -109,6 +133,8 @@ it('membatasi frekuensi pengiriman per ip', function () {
 });
 
 it('menolak isi terlalu pendek', function () {
+    actingAsKontributor();
+
     post(route('submissions.store'), validPayload(['content' => '<p>Terlalu pendek</p>']))
         ->assertSessionHasErrors('content');
 
@@ -116,6 +142,8 @@ it('menolak isi terlalu pendek', function () {
 });
 
 it('menolak nomor wa tidak valid', function (string $wa) {
+    actingAsKontributor();
+
     post(route('submissions.store'), validPayload(['author_wa' => $wa]))
         ->assertSessionHasErrors('author_wa');
 })->with([
@@ -125,6 +153,7 @@ it('menolak nomor wa tidak valid', function (string $wa) {
 ]);
 
 it('menerima upload gambar asli ke direktori kiriman', function () {
+    actingAsKontributor();
     Storage::fake('public');
 
     $response = post(route('submissions.upload'), [
@@ -139,6 +168,7 @@ it('menerima upload gambar asli ke direktori kiriman', function () {
 });
 
 it('menolak file teks yang menyamar jadi jpg', function () {
+    actingAsKontributor();
     Storage::fake('public');
 
     $fake = UploadedFile::fake()->createWithContent('shell.jpg', '<?php system($_GET["cmd"]);');

@@ -45,7 +45,7 @@ $hasSocials = collect($socialLinks)->contains(fn ($social) => filled($social['ur
                     rel="noopener noreferrer"
                     title="{{ $social['label'] }}"
                     aria-label="{{ $social['label'] }}"
-                    class="w-9 h-9 rounded-full bg-neutral-800 flex items-center justify-center text-white hover:bg-[#003399] hover:text-[#FFCC00] transition-colors"
+                    class="w-9 h-9 rounded-full bg-neutral-800 flex items-center justify-center text-white hover:bg-brand hover:text-accent transition-colors"
                 >
                     <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24" role="img" aria-hidden="true">
                         <path d="{{ $social['path'] }}"/>

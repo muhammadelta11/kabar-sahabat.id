@@ -14,7 +14,18 @@ class CommentResource extends Resource
 {
     protected static ?string $model = Comment::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+    protected static ?string $navigationIcon = 'heroicon-o-chat-bubble-left-right';
+
+    protected static ?string $navigationLabel = 'Komentar';
+
+    protected static ?string $navigationGroup = 'Redaksi';
+
+    protected static ?int $navigationSort = 30;
+
+    public static function canViewAny(): bool
+    {
+        return auth()->user()?->canAccess('manage_comments') ?? false;
+    }
 
     public static function form(Form $form): Form
     {

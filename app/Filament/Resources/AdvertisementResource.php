@@ -14,7 +14,18 @@ class AdvertisementResource extends Resource
 {
     protected static ?string $model = Advertisement::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+    protected static ?string $navigationIcon = 'heroicon-o-megaphone';
+
+    protected static ?string $navigationLabel = 'Iklan';
+
+    protected static ?string $navigationGroup = 'Bisnis';
+
+    protected static ?int $navigationSort = 40;
+
+    public static function canViewAny(): bool
+    {
+        return auth()->user()?->canAccess('manage_ads') ?? false;
+    }
 
     public static function form(Form $form): Form
     {
@@ -38,6 +49,9 @@ class AdvertisementResource extends Resource
                 Forms\Components\TextInput::make('name')
                     ->label('Nama Iklan (Untuk Pencatatan)')
                     ->required(),
+                Forms\Components\TextInput::make('client_name')
+                    ->label('Nama Klien / Brand')
+                    ->maxLength(150),
                 Forms\Components\Select::make('type')
                     ->label('Tipe Konten')
                     ->options([
@@ -49,6 +63,15 @@ class AdvertisementResource extends Resource
                 Forms\Components\Toggle::make('is_active')
                     ->label('Aktif')
                     ->default(true),
+                Forms\Components\TextInput::make('monthly_rate')
+                    ->label('Tarif bulanan (Rp)')
+                    ->numeric()
+                    ->minValue(0)
+                    ->helperText('Dipakai untuk estimasi MRR di dashboard Direktur'),
+                Forms\Components\DatePicker::make('starts_at')
+                    ->label('Mulai kontrak'),
+                Forms\Components\DatePicker::make('ends_at')
+                    ->label('Akhir kontrak'),
                 Forms\Components\FileUpload::make('image_url')
                     ->label('File Gambar Banner')
                     ->image()
@@ -80,6 +103,10 @@ class AdvertisementResource extends Resource
                     ->label('Nama Iklan')
                     ->searchable()
                     ->sortable(),
+                Tables\Columns\TextColumn::make('client_name')
+                    ->label('Klien')
+                    ->toggleable()
+                    ->placeholder('—'),
                 Tables\Columns\TextColumn::make('slot_key')
                     ->label('Posisi')
                     ->badge()
@@ -92,6 +119,11 @@ class AdvertisementResource extends Resource
                         'script' => 'info',
                         default => 'gray',
                     }),
+                Tables\Columns\TextColumn::make('monthly_rate')
+                    ->label('Tarif / bln')
+                    ->money('IDR', locale: 'id')
+                    ->placeholder('—')
+                    ->sortable(),
                 Tables\Columns\ToggleColumn::make('is_active')
                     ->label('Status Aktif'),
             ])

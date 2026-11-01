@@ -17,7 +17,7 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        $this->call([UserSeeder::class, CategorySeeder::class]);
+        $this->call([UserSeeder::class, RoleReviewSeeder::class, CategorySeeder::class]);
 
         $user = User::where('email', 'superadmin@mail.com')->firstOrFail();
 

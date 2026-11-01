@@ -55,7 +55,7 @@ class SubmissionController extends Controller
         }
 
         Post::create([
-            'user_id' => null,
+            'user_id' => $request->user()->id,
             'title' => $validated['title'],
             'slug' => PostSlug::unique($validated['title']),
             'content' => $this->sanitizeContent($validated['content']),
@@ -63,6 +63,7 @@ class SubmissionController extends Controller
             'author_name' => $validated['author_name'],
             'author_wa' => preg_replace('/[\s\-]/', '', $validated['author_wa']),
             'author_instansi' => $validated['author_instansi'] ?? null,
+            'penulis' => $validated['author_name'],
         ]);
 
         return redirect()->route('submissions.create')->with('submitted', true);

@@ -92,6 +92,16 @@ class Post extends Model
             ->where('published_at', '<=', now());
     }
 
+    public function displayAuthorName(): string
+    {
+        $name = filled($this->penulis)
+            ? (string) $this->penulis
+            : (filled($this->author_name) ? (string) $this->author_name : (string) ($this->user?->name ?? 'Redaksi'));
+
+        // Hilangkan suffix role yang sempat ikut di nama akun
+        return trim((string) preg_replace('/\s*-\s*(Super Admin|Direktur|Pimpinan Redaktur|Redaktur|Kontributor|Admin)\s*$/iu', '', $name)) ?: 'Redaksi';
+    }
+
     public function user()
     {
         return $this->belongsTo(User::class);

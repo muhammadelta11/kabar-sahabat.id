@@ -24,6 +24,8 @@ it('membangun url media absolut untuk OG dan sitemap', function () {
         ->toBe('https://kabarsahabat.id/storage/posts/foto.jpg')
         ->and(media_absolute_url('https://cdn.example/x.jpg'))
         ->toBe('https://cdn.example/x.jpg')
+        ->and(media_absolute_url('//cdn.example/y.jpg'))
+        ->toBe('https://cdn.example/y.jpg')
         ->and(media_absolute_url(null))
         ->toBeNull();
 });
