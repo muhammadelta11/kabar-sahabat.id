@@ -8,6 +8,7 @@ use App\Filament\Resources\PostResource\Pages\ListPosts;
 use App\Models\Post;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Cache;
 use Livewire\Livewire;
 
 use function Pest\Laravel\actingAs;
@@ -132,4 +133,24 @@ it('konfigurasi list berita mengoptimalkan query dan defer loading', function ()
         ->toContain('persistFiltersInSession')
         ->toContain('{$tableName}.title')
         ->not->toContain('{$tableName}.content');
+});
+
+it('tab status tetap aman jika cache menyimpan nilai non-array', function () {
+    $user = User::factory()->redaktur()->create();
+
+    Post::factory()->create([
+        'user_id' => $user->id,
+        'status' => 'Draft',
+        'title' => 'Draft Tab Cache',
+    ]);
+
+    Cache::put('admin.posts.status_tabs', 'corrupt', 30);
+
+    actingAs($user);
+
+    Livewire::test(ListPosts::class)
+        ->assertSuccessful()
+        ->assertSee('Draft');
+
+    expect(Cache::get('admin.posts.status_tabs'))->toBeArray();
 });

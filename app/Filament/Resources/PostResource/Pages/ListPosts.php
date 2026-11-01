@@ -44,16 +44,24 @@ class ListPosts extends ListRecords
 
     public function getTabs(): array
     {
-        $counts = Cache::remember('admin.posts.status_tabs', 30, function () {
-            return Post::query()
-                ->selectRaw('status, COUNT(*) as aggregate')
-                ->groupBy('status')
-                ->pluck('aggregate', 'status');
-        });
+        // Cache array saja — Laravel 13 serializable_classes=false tidak mengembalikan Collection.
+        $counts = Cache::get('admin.posts.status_tabs');
+
+        if (! is_array($counts)) {
+            Cache::forget('admin.posts.status_tabs');
+            $counts = Cache::remember('admin.posts.status_tabs', 30, function (): array {
+                return Post::query()
+                    ->selectRaw('status, COUNT(*) as aggregate')
+                    ->groupBy('status')
+                    ->pluck('aggregate', 'status')
+                    ->map(fn ($count): int => (int) $count)
+                    ->all();
+            });
+        }
 
         return [
             'semua' => Tab::make('Semua')
-                ->badge((string) $counts->sum()),
+                ->badge((string) array_sum($counts)),
             'review' => Tab::make('Menunggu Review')
                 ->icon('heroicon-m-clock')
                 ->modifyQueryUsing(fn (Builder $query) => $query->where('status', 'Menunggu Review'))

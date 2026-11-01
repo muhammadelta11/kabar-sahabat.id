@@ -46,25 +46,34 @@ class RedakturPerformanceTable extends BaseWidget
         $today = now()->toDateString();
         $weekStart = now()->startOfWeek()->toDateTimeString();
 
-        return Cache::remember(static::cacheKey(), 60, function () use ($today, $weekStart) {
-            return User::query()
-                ->select(['id', 'name', 'role'])
-                ->whereIn('role', [UserRole::Redaktur, UserRole::PimpinanRedaktur])
-                ->withCount([
-                    'posts as uploaded_today' => fn (Builder $query) => $query
-                        ->whereDate('created_at', $today),
-                    'posts as uploaded_week' => fn (Builder $query) => $query
-                        ->where('created_at', '>=', $weekStart),
-                    'posts as published_today' => fn (Builder $query) => $query
-                        ->where('status', 'Published')
-                        ->whereDate('published_at', $today),
-                    'posts as published_week' => fn (Builder $query) => $query
-                        ->where('status', 'Published')
-                        ->where('published_at', '>=', $weekStart),
-                ])
-                ->orderByDesc('uploaded_today')
-                ->get();
-        });
+        $rows = Cache::get(static::cacheKey());
+
+        if (! is_array($rows)) {
+            Cache::forget(static::cacheKey());
+            $rows = Cache::remember(static::cacheKey(), 60, function () use ($today, $weekStart): array {
+                return User::query()
+                    ->select(['id', 'name', 'role'])
+                    ->whereIn('role', [UserRole::Redaktur, UserRole::PimpinanRedaktur])
+                    ->withCount([
+                        'posts as uploaded_today' => fn (Builder $query) => $query
+                            ->whereDate('created_at', $today),
+                        'posts as uploaded_week' => fn (Builder $query) => $query
+                            ->where('created_at', '>=', $weekStart),
+                        'posts as published_today' => fn (Builder $query) => $query
+                            ->where('status', 'Published')
+                            ->whereDate('published_at', $today),
+                        'posts as published_week' => fn (Builder $query) => $query
+                            ->where('status', 'Published')
+                            ->where('published_at', '>=', $weekStart),
+                    ])
+                    ->orderByDesc('uploaded_today')
+                    ->get()
+                    ->map(fn (User $user): array => $user->getAttributes())
+                    ->all();
+            });
+        }
+
+        return User::query()->hydrate($rows);
     }
 
     public function getTableRecords(): Collection|Paginator|CursorPaginator

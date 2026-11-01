@@ -39,14 +39,23 @@ class PopularPostsTable extends BaseWidget
      */
     public static function cachedRows(): Collection
     {
-        return Cache::remember(static::cacheKey(), 60, function () {
-            return Post::query()
-                ->published()
-                ->select(['id', 'title', 'views_count', 'published_at', 'status'])
-                ->orderByDesc('views_count')
-                ->limit(5)
-                ->get();
-        });
+        $rows = Cache::get(static::cacheKey());
+
+        if (! is_array($rows)) {
+            Cache::forget(static::cacheKey());
+            $rows = Cache::remember(static::cacheKey(), 60, function (): array {
+                return Post::query()
+                    ->published()
+                    ->select(['id', 'title', 'views_count', 'published_at', 'status'])
+                    ->orderByDesc('views_count')
+                    ->limit(5)
+                    ->get()
+                    ->map(fn (Post $post): array => $post->getAttributes())
+                    ->all();
+            });
+        }
+
+        return Post::query()->hydrate($rows);
     }
 
     public function getTableRecords(): Collection|Paginator|CursorPaginator

@@ -47,49 +47,84 @@ final class RedakturOperationalRecap
         $weekEnd = now()->toDateTimeString();
         $weekDays = self::weekDaysCounted();
 
-        return Cache::remember(self::cacheKey(), 60, function () use ($today, $weekStart, $weekEnd, $weekDays) {
-            $activeDaysSub = Post::query()
-                ->selectRaw('count(distinct date(published_at))')
-                ->whereColumn('posts.user_id', 'users.id')
-                ->where('status', 'Published')
-                ->whereBetween('published_at', [$weekStart, $weekEnd]);
+        $rows = Cache::get(self::cacheKey());
 
-            return User::query()
-                ->select(['users.id', 'users.name', 'users.role'])
-                ->whereIn('role', [UserRole::Redaktur, UserRole::PimpinanRedaktur])
-                ->selectSub($activeDaysSub, 'active_days_week')
-                ->withCount([
-                    'posts as uploaded_today' => fn (Builder $query) => $query
-                        ->whereDate('created_at', $today),
-                    'posts as uploaded_week' => fn (Builder $query) => $query
-                        ->where('created_at', '>=', $weekStart),
-                    'posts as published_today' => fn (Builder $query) => $query
-                        ->where('status', 'Published')
-                        ->whereDate('published_at', $today),
-                    'posts as published_week' => fn (Builder $query) => $query
-                        ->where('status', 'Published')
-                        ->where('published_at', '>=', $weekStart),
-                ])
-                ->orderByDesc('published_today')
-                ->orderByDesc('uploaded_today')
-                ->get()
-                ->map(function (User $user) use ($weekDays): array {
-                    $activeDays = (int) $user->active_days_week;
-                    $publishedToday = (int) $user->published_today;
-                    $consistency = round(min($activeDays / $weekDays, 1) * 100, 1);
+        if (! is_array($rows)) {
+            Cache::forget(self::cacheKey());
+            $rows = Cache::remember(self::cacheKey(), 60, function () use ($today, $weekStart, $weekEnd, $weekDays): array {
+                $activeDaysSub = Post::query()
+                    ->selectRaw('count(distinct date(published_at))')
+                    ->whereColumn('posts.user_id', 'users.id')
+                    ->where('status', 'Published')
+                    ->whereBetween('published_at', [$weekStart, $weekEnd]);
 
-                    return [
-                        'user' => $user,
-                        'uploaded_today' => (int) $user->uploaded_today,
-                        'published_today' => $publishedToday,
-                        'uploaded_week' => (int) $user->uploaded_week,
-                        'published_week' => (int) $user->published_week,
-                        'active_days_week' => $activeDays,
-                        'consistency_week' => $consistency,
-                        'low_today' => $publishedToday === 0,
-                        'low_week' => $consistency < 40,
-                    ];
-                });
-        });
+                return User::query()
+                    ->select(['users.id', 'users.name', 'users.role'])
+                    ->whereIn('role', [UserRole::Redaktur, UserRole::PimpinanRedaktur])
+                    ->selectSub($activeDaysSub, 'active_days_week')
+                    ->withCount([
+                        'posts as uploaded_today' => fn (Builder $query) => $query
+                            ->whereDate('created_at', $today),
+                        'posts as uploaded_week' => fn (Builder $query) => $query
+                            ->where('created_at', '>=', $weekStart),
+                        'posts as published_today' => fn (Builder $query) => $query
+                            ->where('status', 'Published')
+                            ->whereDate('published_at', $today),
+                        'posts as published_week' => fn (Builder $query) => $query
+                            ->where('status', 'Published')
+                            ->where('published_at', '>=', $weekStart),
+                    ])
+                    ->orderByDesc('published_today')
+                    ->orderByDesc('uploaded_today')
+                    ->get()
+                    ->map(function (User $user) use ($weekDays): array {
+                        $activeDays = (int) $user->active_days_week;
+                        $publishedToday = (int) $user->published_today;
+                        $consistency = round(min($activeDays / $weekDays, 1) * 100, 1);
+
+                        return [
+                            'user_id' => (int) $user->id,
+                            'uploaded_today' => (int) $user->uploaded_today,
+                            'published_today' => $publishedToday,
+                            'uploaded_week' => (int) $user->uploaded_week,
+                            'published_week' => (int) $user->published_week,
+                            'active_days_week' => $activeDays,
+                            'consistency_week' => $consistency,
+                            'low_today' => $publishedToday === 0,
+                            'low_week' => $consistency < 40,
+                        ];
+                    })
+                    ->all();
+            });
+        }
+
+        $users = User::query()
+            ->select(['id', 'name', 'role'])
+            ->whereIn('id', collect($rows)->pluck('user_id'))
+            ->get()
+            ->keyBy('id');
+
+        return collect($rows)
+            ->map(function (array $row) use ($users): ?array {
+                $user = $users->get($row['user_id'] ?? null);
+
+                if (! $user) {
+                    return null;
+                }
+
+                return [
+                    'user' => $user,
+                    'uploaded_today' => (int) $row['uploaded_today'],
+                    'published_today' => (int) $row['published_today'],
+                    'uploaded_week' => (int) $row['uploaded_week'],
+                    'published_week' => (int) $row['published_week'],
+                    'active_days_week' => (int) $row['active_days_week'],
+                    'consistency_week' => (float) $row['consistency_week'],
+                    'low_today' => (bool) $row['low_today'],
+                    'low_week' => (bool) $row['low_week'],
+                ];
+            })
+            ->filter()
+            ->values();
     }
 }
