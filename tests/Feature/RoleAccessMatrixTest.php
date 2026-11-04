@@ -5,6 +5,7 @@ use App\Filament\Resources\AdvertisementResource;
 use App\Filament\Resources\CategoryResource;
 use App\Filament\Resources\CommentResource;
 use App\Filament\Resources\PostResource;
+use App\Filament\Resources\TagResource;
 use App\Filament\Resources\UserResource;
 use App\Filament\Widgets\BusinessStatsOverview;
 use App\Filament\Widgets\EditorialQueueOverview;
@@ -27,23 +28,24 @@ it('memberi matriks akses resource sesuai role', function (UserRole $role, array
         ->and(AdvertisementResource::canViewAny())->toBe($expected['ads'])
         ->and(PostResource::canViewAny())->toBe($expected['posts'])
         ->and(CategoryResource::canViewAny())->toBe($expected['categories'])
+        ->and(TagResource::canViewAny())->toBe($expected['tags'])
         ->and(CommentResource::canViewAny())->toBe($expected['comments']);
 })->with([
     'super_admin' => [UserRole::SuperAdmin, [
         'users' => true, 'settings' => true, 'ads' => true,
-        'posts' => true, 'categories' => true, 'comments' => true,
+        'posts' => true, 'categories' => true, 'tags' => true, 'comments' => true,
     ]],
     'direktur' => [UserRole::Direktur, [
         'users' => false, 'settings' => false, 'ads' => true,
-        'posts' => false, 'categories' => false, 'comments' => false,
+        'posts' => false, 'categories' => false, 'tags' => false, 'comments' => false,
     ]],
     'pimpinan_redaktur' => [UserRole::PimpinanRedaktur, [
         'users' => false, 'settings' => false, 'ads' => false,
-        'posts' => true, 'categories' => true, 'comments' => true,
+        'posts' => true, 'categories' => true, 'tags' => true, 'comments' => true,
     ]],
     'redaktur' => [UserRole::Redaktur, [
         'users' => false, 'settings' => false, 'ads' => false,
-        'posts' => true, 'categories' => true, 'comments' => true,
+        'posts' => true, 'categories' => true, 'tags' => true, 'comments' => true,
     ]],
 ]);
 

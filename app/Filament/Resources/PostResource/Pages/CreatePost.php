@@ -5,6 +5,8 @@ namespace App\Filament\Resources\PostResource\Pages;
 use App\Filament\Resources\PostResource;
 use App\Support\AutoRelatedPosts;
 use Filament\Actions\Action;
+use Filament\Forms;
+use Filament\Forms\Get;
 use Filament\Resources\Pages\CreateRecord;
 use Filament\Support\Enums\MaxWidth;
 use Illuminate\Support\Js;
@@ -17,19 +19,21 @@ class CreatePost extends CreateRecord
 
     public ?string $saveIntent = null;
 
+    public mixed $publishAt = null;
+
     public function getTitle(): string
     {
-        return 'Tulis';
+        return 'Buat berita';
     }
 
     public function getHeading(): string
     {
-        return 'Tulis';
+        return 'Buat berita';
     }
 
     public function getSubheading(): ?string
     {
-        return null;
+        return 'Tulis dari judul sampai isi, lalu pilih kanal & tag.';
     }
 
     public function getMaxContentWidth(): MaxWidth|string|null
@@ -55,10 +59,34 @@ class CreatePost extends CreateRecord
                 ->label('Publish')
                 ->icon('heroicon-m-globe-alt')
                 ->color('success')
-                ->action(function (): void {
+                ->modalHeading('Publish berita')
+                ->modalDescription('Tayangkan sekarang atau atur jadwal terbit.')
+                ->modalSubmitActionLabel('Lanjut publish')
+                ->form([
+                    Forms\Components\Radio::make('when')
+                        ->label('Kapan tayang?')
+                        ->options([
+                            'now' => 'Publish sekarang',
+                            'schedule' => 'Jadwalkan',
+                        ])
+                        ->default('now')
+                        ->live()
+                        ->required(),
+                    Forms\Components\DateTimePicker::make('published_at')
+                        ->label('Jadwal tayang')
+                        ->seconds(false)
+                        ->native(false)
+                        ->minDate(now())
+                        ->default(now()->addHour())
+                        ->visible(fn (Get $get): bool => $get('when') === 'schedule')
+                        ->required(fn (Get $get): bool => $get('when') === 'schedule'),
+                ])
+                ->action(function (array $data): void {
                     $this->saveIntent = 'Published';
+                    $this->publishAt = ($data['when'] ?? 'now') === 'schedule'
+                        ? $data['published_at']
+                        : now();
                     $this->data['status'] = 'Published';
-                    $this->data['published_at'] ??= now();
                     $this->create();
                 }),
             Action::make('saveDraft')
@@ -68,6 +96,7 @@ class CreatePost extends CreateRecord
                 ->keyBindings(['mod+s'])
                 ->action(function (): void {
                     $this->saveIntent = 'Draft';
+                    $this->publishAt = null;
                     $this->data['status'] = 'Draft';
                     $this->create();
                 }),
@@ -85,8 +114,8 @@ class CreatePost extends CreateRecord
         $data['user_id'] ??= auth()->id();
         $data['status'] = $this->saveIntent ?? ($data['status'] ?? 'Draft');
 
-        if ($data['status'] === 'Published' && blank($data['published_at'] ?? null)) {
-            $data['published_at'] = now();
+        if ($data['status'] === 'Published') {
+            $data['published_at'] = $this->publishAt ?? ($data['published_at'] ?? now());
         }
 
         return $data;

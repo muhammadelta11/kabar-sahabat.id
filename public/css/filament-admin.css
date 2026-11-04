@@ -699,14 +699,6 @@ textarea.fi-input {
         padding-bottom: calc(1.25rem + env(safe-area-inset-bottom, 0px)) !important;
     }
 
-    /* Sembunyikan bottom nav di halaman tulis — fokus menulis */
-    html.ks-writer-mode .ks-mobile-bottom-nav,
-    body.ks-writer-mode .ks-mobile-bottom-nav,
-    body:has(.fi-resource-create-record-page) .ks-mobile-bottom-nav,
-    body:has(.fi-resource-edit-record-page) .ks-mobile-bottom-nav {
-        display: none !important;
-    }
-
     .fi-resource-create-record-page,
     .fi-resource-edit-record-page {
         width: 100% !important;
@@ -741,14 +733,21 @@ textarea.fi-input {
 
     .fi-resource-create-record-page .fi-header-heading,
     .fi-resource-edit-record-page .fi-header-heading {
-        font-size: 0.95rem !important;
-        font-weight: 800 !important;
-        letter-spacing: -0.02em !important;
-        line-height: 1.2 !important;
+        font-size: 1.15rem !important;
+        font-weight: 700 !important;
+        letter-spacing: -0.03em !important;
+        line-height: 1.25 !important;
     }
 
     .fi-resource-create-record-page .fi-header-subheading,
-    .fi-resource-edit-record-page .fi-header-subheading,
+    .fi-resource-edit-record-page .fi-header-subheading {
+        display: block !important;
+        font-size: 0.78rem !important;
+        font-weight: 500 !important;
+        color: var(--ks-muted) !important;
+        margin-top: 0.15rem !important;
+    }
+
     .fi-resource-create-record-page .fi-breadcrumbs,
     .fi-resource-edit-record-page .fi-breadcrumbs,
     .fi-resource-create-record-page .fi-section-header-description,
@@ -760,15 +759,15 @@ textarea.fi-input {
         display: none !important;
     }
 
-    /* Bar aksi: Publish · Draft · Batal */
+    /* Bar aksi di atas bottom nav */
     .fi-resource-create-record-page .fi-form-actions,
     .fi-resource-edit-record-page .fi-form-actions {
         position: sticky;
-        bottom: 0;
+        bottom: calc(3.9rem + env(safe-area-inset-bottom, 0px));
         z-index: 40;
         display: block !important;
         margin: 0.75rem 0 0 !important;
-        padding: 0.65rem 0.75rem calc(0.65rem + env(safe-area-inset-bottom, 0px)) !important;
+        padding: 0.65rem 0.75rem !important;
         width: 100% !important;
         background: color-mix(in srgb, var(--ks-card) 94%, transparent);
         backdrop-filter: blur(14px);

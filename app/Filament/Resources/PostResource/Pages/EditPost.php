@@ -5,6 +5,8 @@ namespace App\Filament\Resources\PostResource\Pages;
 use App\Filament\Resources\PostResource;
 use App\Support\AutoRelatedPosts;
 use Filament\Actions;
+use Filament\Forms;
+use Filament\Forms\Get;
 use Filament\Resources\Pages\EditRecord;
 use Filament\Support\Enums\MaxWidth;
 use Illuminate\Database\Eloquent\Model;
@@ -17,14 +19,16 @@ class EditPost extends EditRecord
 
     public ?string $saveIntent = null;
 
+    public mixed $publishAt = null;
+
     public function getTitle(): string
     {
-        return 'Edit';
+        return 'Edit berita';
     }
 
     public function getHeading(): string
     {
-        return 'Edit';
+        return 'Edit berita';
     }
 
     public function getSubheading(): ?string
@@ -44,6 +48,7 @@ class EditPost extends EditRecord
 
         $record->loadMissing([
             'categories:id,name',
+            'tags:id,name',
             'relatedPosts:id,title,slug,status',
             'user:id,name',
         ]);
@@ -63,7 +68,9 @@ class EditPost extends EditRecord
                 ->url(fn (): string => route('news.show', $this->record->slug))
                 ->openUrlInNewTab()
                 ->color('gray')
-                ->visible(fn (): bool => $this->record->status === 'Published'),
+                ->visible(fn (): bool => $this->record->status === 'Published'
+                    && $this->record->published_at
+                    && $this->record->published_at->lte(now())),
             Actions\DeleteAction::make()
                 ->iconButton()
                 ->after(fn () => PostResource::forgetPendingReviewCount()),
@@ -80,10 +87,36 @@ class EditPost extends EditRecord
                 ->label('Publish')
                 ->icon('heroicon-m-globe-alt')
                 ->color('success')
-                ->action(function (): void {
+                ->modalHeading('Publish berita')
+                ->modalDescription('Tayangkan sekarang atau atur jadwal terbit.')
+                ->modalSubmitActionLabel('Lanjut publish')
+                ->form([
+                    Forms\Components\Radio::make('when')
+                        ->label('Kapan tayang?')
+                        ->options([
+                            'now' => 'Publish sekarang',
+                            'schedule' => 'Jadwalkan',
+                        ])
+                        ->default('now')
+                        ->live()
+                        ->required(),
+                    Forms\Components\DateTimePicker::make('published_at')
+                        ->label('Jadwal tayang')
+                        ->seconds(false)
+                        ->native(false)
+                        ->minDate(now())
+                        ->default(fn () => $this->record->published_at?->isFuture()
+                            ? $this->record->published_at
+                            : now()->addHour())
+                        ->visible(fn (Get $get): bool => $get('when') === 'schedule')
+                        ->required(fn (Get $get): bool => $get('when') === 'schedule'),
+                ])
+                ->action(function (array $data): void {
                     $this->saveIntent = 'Published';
+                    $this->publishAt = ($data['when'] ?? 'now') === 'schedule'
+                        ? $data['published_at']
+                        : now();
                     $this->data['status'] = 'Published';
-                    $this->data['published_at'] ??= now();
                     $this->save();
                 }),
             Actions\Action::make('saveDraft')
@@ -93,6 +126,7 @@ class EditPost extends EditRecord
                 ->keyBindings(['mod+s'])
                 ->action(function (): void {
                     $this->saveIntent = 'Draft';
+                    $this->publishAt = null;
                     $this->data['status'] = 'Draft';
                     $this->save();
                 }),
@@ -111,7 +145,9 @@ class EditPost extends EditRecord
             $data['status'] = $this->saveIntent;
         }
 
-        if (($data['status'] ?? null) === 'Published' && blank($data['published_at'] ?? null)) {
+        if (($data['status'] ?? null) === 'Published' && $this->publishAt !== null) {
+            $data['published_at'] = $this->publishAt;
+        } elseif (($data['status'] ?? null) === 'Published' && blank($data['published_at'] ?? null)) {
             $data['published_at'] = now();
         }
 

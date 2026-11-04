@@ -46,6 +46,7 @@ enum UserRole: string
                 'manage_ads',
                 'manage_posts',
                 'manage_categories',
+                'manage_tags',
                 'manage_comments',
                 'manage_contributors',
                 'view_business_dashboard',
@@ -60,6 +61,7 @@ enum UserRole: string
             self::PimpinanRedaktur => [
                 'manage_posts',
                 'manage_categories',
+                'manage_tags',
                 'manage_comments',
                 'manage_contributors',
                 'view_editorial_dashboard',
@@ -68,6 +70,7 @@ enum UserRole: string
             self::Redaktur => [
                 'manage_posts',
                 'manage_categories',
+                'manage_tags',
                 'manage_comments',
                 'manage_contributors',
                 'view_editorial_dashboard',

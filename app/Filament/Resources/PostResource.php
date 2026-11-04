@@ -4,6 +4,7 @@ namespace App\Filament\Resources;
 
 use App\Filament\Resources\PostResource\Pages;
 use App\Models\Post;
+use App\Models\Tag;
 use App\Support\AutoRelatedPosts;
 use App\Support\EditorialInsights;
 use App\Support\MediaImageProcessor;
@@ -21,6 +22,7 @@ use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\HtmlString;
+use Illuminate\Support\Str;
 
 class PostResource extends Resource
 {
@@ -46,7 +48,7 @@ class PostResource extends Resource
     public static function getEloquentQuery(): Builder
     {
         return parent::getEloquentQuery()
-            ->with(['user:id,name', 'categories:id,name']);
+            ->with(['user:id,name', 'categories:id,name', 'tags:id,name']);
     }
 
     public static function pendingReviewCount(): int
@@ -110,216 +112,222 @@ class PostResource extends Resource
     {
         return $form
             ->schema([
-                Forms\Components\Grid::make([
-                    'default' => 1,
-                    'lg' => 3,
-                ])->schema([
-                    Forms\Components\Group::make([
-                        Forms\Components\Section::make()
-                            ->schema([
-                                Forms\Components\TextInput::make('title')
-                                    ->hiddenLabel()
-                                    ->placeholder('Judul berita…')
+                Forms\Components\Section::make()
+                    ->schema([
+                        Forms\Components\TextInput::make('title')
+                            ->hiddenLabel()
+                            ->placeholder('Judul berita…')
+                            ->required()
+                            ->maxLength(180)
+                            ->live(onBlur: true)
+                            ->extraInputAttributes(['class' => 'ks-writer-title'])
+                            ->extraFieldWrapperAttributes(['class' => 'ks-writer-title-wrap'])
+                            ->afterStateUpdated(function (Set $set, Get $get, ?string $state, Forms\Components\TextInput $component): void {
+                                if (blank($state)) {
+                                    return;
+                                }
+
+                                $record = $component->getRecord();
+
+                                if ($record && filled($get('slug')) && PostSlug::isClean($get('slug'))) {
+                                    return;
+                                }
+
+                                $set('slug', PostSlug::unique($state, $record?->getKey()));
+                            }),
+                        Forms\Components\TextInput::make('slug')
+                            ->label('Slug')
+                            ->helperText('Otomatis dari judul')
+                            ->required()
+                            ->maxLength(180)
+                            ->live(onBlur: true)
+                            ->unique(ignoreRecord: true)
+                            ->extraFieldWrapperAttributes(['class' => 'ks-writer-meta-field']),
+                        Forms\Components\FileUpload::make('image_url')
+                            ->label('Gambar utama')
+                            ->image()
+                            ->disk(fn () => media_disk())
+                            ->directory('posts')
+                            ->visibility('public')
+                            ->acceptedFileTypes(['image/jpeg', 'image/png', 'image/webp'])
+                            ->maxSize(5120)
+                            ->saveUploadedFileUsing(MediaImageProcessor::filamentSaver('posts'))
+                            ->helperText('JPG/PNG/WebP maks. 5MB. Otomatis kompres + watermark.')
+                            ->validationMessages([
+                                'max' => 'Gambar terlalu besar (maks. 5MB). Sistem akan mengompres setelah diunggah.',
+                                'mimetypes' => 'Format gambar harus JPG, PNG, atau WebP.',
+                            ])
+                            ->extraFieldWrapperAttributes(['class' => 'ks-writer-image-wrap']),
+                        Forms\Components\TextInput::make('image_caption')
+                            ->label('Caption gambar')
+                            ->placeholder('Foto: Dok. …')
+                            ->extraFieldWrapperAttributes(['class' => 'ks-writer-meta-field']),
+                        Forms\Components\RichEditor::make('content')
+                            ->label('Isi berita')
+                            ->columnSpanFull()
+                            ->extraFieldWrapperAttributes(['class' => 'ks-writer-body-wrap'])
+                            ->toolbarButtons([
+                                'attachFiles',
+                                'blockquote',
+                                'bold',
+                                'bulletList',
+                                'h2',
+                                'h3',
+                                'italic',
+                                'link',
+                                'orderedList',
+                                'redo',
+                                'strike',
+                                'underline',
+                                'undo',
+                            ]),
+                    ]),
+                Forms\Components\Section::make('Kategori & tag')
+                    ->compact()
+                    ->schema([
+                        Forms\Components\Select::make('categories')
+                            ->label('Kanal')
+                            ->relationship('categories', 'name')
+                            ->multiple()
+                            ->preload()
+                            ->searchable()
+                            ->native(false)
+                            ->extraAttributes(['class' => 'ks-kanal-select']),
+                        Forms\Components\Select::make('tags')
+                            ->label('Tag')
+                            ->relationship('tags', 'name')
+                            ->multiple()
+                            ->preload()
+                            ->searchable()
+                            ->createOptionForm([
+                                Forms\Components\TextInput::make('name')
+                                    ->label('Nama tag')
                                     ->required()
-                                    ->maxLength(180)
-                                    ->live(onBlur: true)
-                                    ->extraInputAttributes(['class' => 'ks-writer-title'])
-                                    ->extraFieldWrapperAttributes(['class' => 'ks-writer-title-wrap'])
-                                    ->afterStateUpdated(function (Set $set, Get $get, ?string $state, Forms\Components\TextInput $component): void {
-                                        if (blank($state)) {
-                                            return;
-                                        }
-
-                                        $record = $component->getRecord();
-
-                                        if ($record && filled($get('slug')) && PostSlug::isClean($get('slug'))) {
-                                            return;
-                                        }
-
-                                        $set('slug', PostSlug::unique($state, $record?->getKey()));
-                                    }),
+                                    ->maxLength(80),
                                 Forms\Components\TextInput::make('slug')
-                                    ->label('Slug')
                                     ->required()
-                                    ->maxLength(180)
-                                    ->live(onBlur: true)
-                                    ->unique(ignoreRecord: true)
-                                    ->extraFieldWrapperAttributes(['class' => 'ks-writer-meta-field']),
-                                Forms\Components\Textarea::make('excerpt')
-                                    ->hiddenLabel()
-                                    ->placeholder('Ringkasan singkat untuk Google & share…')
-                                    ->rows(2)
-                                    ->live(onBlur: true)
-                                    ->columnSpanFull()
-                                    ->extraInputAttributes(['class' => 'ks-writer-excerpt'])
-                                    ->extraFieldWrapperAttributes(['class' => 'ks-writer-excerpt-wrap']),
-                                Forms\Components\RichEditor::make('content')
-                                    ->hiddenLabel()
-                                    ->columnSpanFull()
-                                    ->extraFieldWrapperAttributes(['class' => 'ks-writer-body-wrap'])
-                                    ->toolbarButtons([
-                                        'attachFiles',
-                                        'blockquote',
-                                        'bold',
-                                        'bulletList',
-                                        'h2',
-                                        'h3',
-                                        'italic',
-                                        'link',
-                                        'orderedList',
-                                        'redo',
-                                        'strike',
-                                        'underline',
-                                        'undo',
-                                    ]),
-                            ]),
-                        Forms\Components\Section::make('SEO')
-                            ->collapsed()
-                            ->compact()
-                            ->schema([
-                                Forms\Components\Placeholder::make('seo_analysis')
-                                    ->hiddenLabel()
-                                    ->content(function (Get $get): HtmlString {
-                                        $analysis = SeoAnalyzer::analyze(
-                                            $get('title'),
-                                            $get('slug'),
-                                            $get('excerpt'),
-                                            $get('content'),
-                                            $get('image_url'),
-                                        );
+                                    ->maxLength(100)
+                                    ->unique('tags', 'slug'),
+                            ])
+                            ->createOptionUsing(function (array $data): int {
+                                $tag = Tag::query()->create([
+                                    'name' => $data['name'],
+                                    'slug' => $data['slug'] ?: Str::slug($data['name']),
+                                ]);
 
-                                        return new HtmlString(
-                                            view('filament.forms.seo-analysis', compact('analysis'))->render()
-                                        );
-                                    }),
-                            ]),
-                    ])->columnSpan(['lg' => 2]),
+                                return $tag->getKey();
+                            })
+                            ->native(false),
+                        Forms\Components\Select::make('status')
+                            ->options([
+                                'Menunggu Review' => 'Menunggu Review',
+                                'Draft' => 'Draft',
+                                'Published' => 'Published',
+                                'Archived' => 'Archived',
+                            ])
+                            ->required()
+                            ->native(false)
+                            ->live()
+                            ->default('Draft')
+                            ->visibleOn('edit'),
+                        Forms\Components\TextInput::make('views_count')
+                            ->label('Views')
+                            ->numeric()
+                            ->default(0)
+                            ->disabled()
+                            ->dehydrated(false)
+                            ->visibleOn('edit'),
+                    ]),
+                Forms\Components\Section::make('SEO')
+                    ->compact()
+                    ->collapsed()
+                    ->schema([
+                        Forms\Components\Textarea::make('excerpt')
+                            ->label('Ringkasan / meta deskripsi')
+                            ->placeholder('Ringkasan singkat untuk Google & share…')
+                            ->rows(3)
+                            ->live(onBlur: true)
+                            ->columnSpanFull(),
+                        Forms\Components\Placeholder::make('seo_analysis')
+                            ->hiddenLabel()
+                            ->content(function (Get $get): HtmlString {
+                                $analysis = SeoAnalyzer::analyze(
+                                    $get('title'),
+                                    $get('slug'),
+                                    $get('excerpt'),
+                                    $get('content'),
+                                    $get('image_url'),
+                                );
 
-                    Forms\Components\Group::make([
-                        Forms\Components\Section::make('Publikasi')
-                            ->compact()
-                            ->collapsed()
-                            ->schema([
-                                Forms\Components\Select::make('status')
-                                    ->options([
-                                        'Menunggu Review' => 'Menunggu Review',
-                                        'Draft' => 'Draft',
-                                        'Published' => 'Published',
-                                        'Archived' => 'Archived',
-                                    ])
-                                    ->required()
-                                    ->native(false)
-                                    ->live()
-                                    ->default('Draft'),
-                                Forms\Components\DateTimePicker::make('published_at')
-                                    ->label('Jadwal tayang')
-                                    ->default(now())
-                                    ->seconds(false)
-                                    ->native(false),
-                                Forms\Components\Select::make('categories')
-                                    ->label('Kanal')
-                                    ->relationship('categories', 'name')
-                                    ->multiple()
-                                    ->preload()
-                                    ->searchable()
-                                    ->native(false)
-                                    ->extraAttributes(['class' => 'ks-kanal-select']),
-                                Forms\Components\TextInput::make('views_count')
-                                    ->label('Views')
-                                    ->numeric()
-                                    ->default(0)
-                                    ->disabled()
-                                    ->dehydrated(false)
-                                    ->visibleOn('edit'),
-                            ]),
-                        Forms\Components\Section::make('Gambar')
-                            ->compact()
-                            ->collapsed()
-                            ->schema([
-                                Forms\Components\FileUpload::make('image_url')
-                                    ->hiddenLabel()
-                                    ->image()
-                                    ->disk(fn () => media_disk())
-                                    ->directory('posts')
-                                    ->visibility('public')
-                                    ->acceptedFileTypes(['image/jpeg', 'image/png', 'image/webp'])
-                                    ->maxSize(5120)
-                                    ->saveUploadedFileUsing(MediaImageProcessor::filamentSaver('posts'))
-                                    ->helperText('JPG/PNG/WebP maks. 5MB. Otomatis kompres + watermark.')
-                                    ->validationMessages([
-                                        'max' => 'Gambar terlalu besar (maks. 5MB). Sistem akan mengompres setelah diunggah.',
-                                        'mimetypes' => 'Format gambar harus JPG, PNG, atau WebP.',
-                                    ]),
-                                Forms\Components\TextInput::make('image_caption')
-                                    ->label('Caption')
-                                    ->placeholder('Foto: Dok. …'),
-                            ]),
-                        Forms\Components\Section::make('Penulis')
-                            ->compact()
-                            ->collapsed()
-                            ->schema([
-                                Forms\Components\Select::make('user_id')
-                                    ->label('Akun redaksi')
-                                    ->relationship('user', 'name')
-                                    ->searchable()
-                                    ->default(fn () => auth()->id())
-                                    ->native(false),
-                                Forms\Components\TextInput::make('penulis')
-                                    ->label('Byline')
-                                    ->placeholder('Nama penulis'),
-                                Forms\Components\TextInput::make('editor')
-                                    ->label('Editor')
-                                    ->placeholder('Nama editor'),
-                            ]),
-                        Forms\Components\Section::make('Kontributor')
-                            ->columns(1)
-                            ->compact()
-                            ->collapsed()
-                            ->visible(fn (Get $get): bool => $get('status') === 'Menunggu Review')
-                            ->schema([
-                                Forms\Components\TextInput::make('author_name')
-                                    ->label('Nama kontributor'),
-                                Forms\Components\TextInput::make('author_wa')
-                                    ->label('No. WA'),
-                                Forms\Components\TextInput::make('author_instansi')
-                                    ->label('Instansi'),
-                            ]),
-                        Forms\Components\Section::make('Baca Juga')
-                            ->compact()
-                            ->collapsed()
-                            ->schema([
-                                Forms\Components\Placeholder::make('related_posts_auto')
-                                    ->hiddenLabel()
-                                    ->content(function (?Post $record): HtmlString {
-                                        if (! $record?->exists) {
-                                            return new HtmlString(
-                                                '<p class="text-sm text-gray-600 dark:text-gray-300">Sistem memilih <strong>3 berita terkait</strong> saat disimpan.</p>'
-                                            );
-                                        }
+                                return new HtmlString(
+                                    view('filament.forms.seo-analysis', compact('analysis'))->render()
+                                );
+                            }),
+                    ]),
+                Forms\Components\Section::make('Penulis')
+                    ->compact()
+                    ->collapsed()
+                    ->schema([
+                        Forms\Components\Select::make('user_id')
+                            ->label('Akun redaksi')
+                            ->relationship('user', 'name')
+                            ->searchable()
+                            ->default(fn () => auth()->id())
+                            ->native(false),
+                        Forms\Components\TextInput::make('penulis')
+                            ->label('Byline')
+                            ->placeholder('Nama penulis'),
+                        Forms\Components\TextInput::make('editor')
+                            ->label('Editor')
+                            ->placeholder('Nama editor'),
+                    ]),
+                Forms\Components\Section::make('Kontributor')
+                    ->columns(1)
+                    ->compact()
+                    ->collapsed()
+                    ->visible(fn (Get $get): bool => $get('status') === 'Menunggu Review')
+                    ->schema([
+                        Forms\Components\TextInput::make('author_name')
+                            ->label('Nama kontributor'),
+                        Forms\Components\TextInput::make('author_wa')
+                            ->label('No. WA'),
+                        Forms\Components\TextInput::make('author_instansi')
+                            ->label('Instansi'),
+                    ]),
+                Forms\Components\Section::make('Baca Juga')
+                    ->compact()
+                    ->collapsed()
+                    ->schema([
+                        Forms\Components\Placeholder::make('related_posts_auto')
+                            ->hiddenLabel()
+                            ->content(function (?Post $record): HtmlString {
+                                if (! $record?->exists) {
+                                    return new HtmlString(
+                                        '<p class="text-sm text-gray-600 dark:text-gray-300">Sistem memilih <strong>3 berita terkait</strong> saat disimpan.</p>'
+                                    );
+                                }
 
-                                        $items = AutoRelatedPosts::previewFor($record);
-                                        if ($items->isEmpty()) {
-                                            return new HtmlString(
-                                                '<p class="text-sm text-amber-700 dark:text-amber-300">Belum ada kandidat. Simpan ulang setelah ada berita lain yang tayang.</p>'
-                                            );
-                                        }
+                                $items = AutoRelatedPosts::previewFor($record);
+                                if ($items->isEmpty()) {
+                                    return new HtmlString(
+                                        '<p class="text-sm text-amber-700 dark:text-amber-300">Belum ada kandidat. Simpan ulang setelah ada berita lain yang tayang.</p>'
+                                    );
+                                }
 
-                                        $lis = $items->map(fn (Post $p) => '<li class="truncate">'.e($p->title).'</li>')->implode('');
+                                $lis = $items->map(fn (Post $p) => '<li class="truncate">'.e($p->title).'</li>')->implode('');
 
-                                        return new HtmlString(
-                                            '<ol class="list-decimal space-y-1 pl-5 text-sm font-medium text-gray-800 dark:text-gray-100">'.$lis.'</ol>'
-                                        );
-                                    }),
-                            ]),
-                    ])->columnSpan(['lg' => 1]),
-                ]),
+                                return new HtmlString(
+                                    '<ol class="list-decimal space-y-1 pl-5 text-sm font-medium text-gray-800 dark:text-gray-100">'.$lis.'</ol>'
+                                );
+                            }),
+                    ]),
             ]);
     }
 
     public static function table(Table $table): Table
     {
         return $table
-            ->defaultSort('updated_at', 'desc')
+            ->defaultSort('created_at', 'desc')
             ->defaultPaginationPageOption(15)
             ->paginated([10, 15, 25, 50])
             ->deferLoading()

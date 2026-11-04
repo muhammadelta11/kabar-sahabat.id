@@ -99,7 +99,7 @@ class AdminPanelProvider extends PanelProvider
         FilamentView::registerRenderHook(
             PanelsRenderHook::STYLES_AFTER,
             fn (): string => new HtmlString(
-                '<link rel="stylesheet" href="'.asset('css/filament-admin.css').'?v=14">'
+                '<link rel="stylesheet" href="'.asset('css/filament-admin.css').'?v=15">'
             ),
         );
 
@@ -115,10 +115,8 @@ class AdminPanelProvider extends PanelProvider
                     <style id="ks-writer-critical">
                     @media (max-width:1023px){
                       .fi-main{padding-left:0!important;padding-right:0!important;max-width:100%!important}
-                      .ks-mobile-bottom-nav{display:none!important}
-                      .ks-writer-title-wrap .fi-input-wrp,
-                      .ks-writer-excerpt-wrap .fi-input-wrp{background:transparent!important;border:0!important;box-shadow:none!important}
-                      .ks-writer-title{font-size:1.55rem!important;font-weight:800!important;letter-spacing:-.035em!important}
+                      .ks-writer-title-wrap .fi-input-wrp{background:transparent!important;border:0!important;box-shadow:none!important}
+                      .ks-writer-title{font-size:1.45rem!important;font-weight:700!important;letter-spacing:-.03em!important}
                     }
                     </style>
                     HTML);

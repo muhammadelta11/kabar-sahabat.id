@@ -4,11 +4,13 @@ namespace App\Filament\Resources;
 
 use App\Filament\Resources\CommentResource\Pages;
 use App\Models\Comment;
+use App\UserRole;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder;
 
 class CommentResource extends Resource
 {
@@ -25,6 +27,20 @@ class CommentResource extends Resource
     public static function canViewAny(): bool
     {
         return auth()->user()?->canAccess('manage_comments') ?? false;
+    }
+
+    public static function getEloquentQuery(): Builder
+    {
+        $query = parent::getEloquentQuery()->with(['post:id,title,user_id']);
+
+        $user = auth()->user();
+
+        // Super admin & pimpinan: semua. Redaktur: hanya komentar di berita miliknya.
+        if ($user?->role === UserRole::Redaktur) {
+            $query->whereHas('post', fn (Builder $postQuery) => $postQuery->where('user_id', $user->id));
+        }
+
+        return $query;
     }
 
     public static function form(Form $form): Form

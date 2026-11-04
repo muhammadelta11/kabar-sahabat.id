@@ -70,23 +70,26 @@ it('membuka form tulis berita dengan layout naskah dan publikasi', function () {
 
     Livewire::test(CreatePost::class)
         ->assertSuccessful()
-        ->assertSee('Tulis')
+        ->assertSee('Buat berita')
         ->assertSee('Publish')
         ->assertSee('Simpan (Draft)')
         ->assertSee('Batal')
         ->assertSee('Judul berita')
         ->assertDontSee('Buat & buat lainnya')
-        ->assertDontSee('Ideal 120')
         ->assertFormFieldExists('title')
+        ->assertFormFieldExists('slug')
+        ->assertFormFieldExists('image_url')
         ->assertFormFieldExists('content')
-        ->assertFormFieldExists('status')
         ->assertFormFieldExists('categories')
-        ->assertFormFieldExists('image_url');
+        ->assertFormFieldExists('tags')
+        ->assertFormFieldExists('excerpt');
 
     expect(CreatePost::canCreateAnother())->toBeFalse()
+        ->and(file_get_contents(app_path('Filament/Resources/PostResource.php')))
+        ->toContain("defaultSort('created_at', 'desc')")
         ->and(file_get_contents(public_path('css/filament-admin.css')))
         ->toContain('ks-writer-title')
-        ->toContain('.ks-mobile-bottom-nav');
+        ->not->toContain('Sembunyikan bottom nav');
 });
 
 it('menyimpan berita baru sebagai draft dan mengarahkan ke edit', function () {
@@ -126,16 +129,44 @@ it('mem-publish berita baru dari tombol Publish', function () {
             'slug' => 'berita-langsung-tayang',
             'excerpt' => str_repeat('Ringkasan siap tayang untuk pembaca. ', 3),
             'content' => '<p>'.str_repeat('Isi artikel siap publish dari mobile writer. ', 40).'</p>',
-            'status' => 'Draft',
         ])
-        ->callAction('publish')
+        ->callAction('publish', data: [
+            'when' => 'now',
+        ])
         ->assertHasNoFormErrors();
 
     $post = Post::query()->where('slug', 'berita-langsung-tayang')->first();
 
     expect($post)->not->toBeNull()
         ->and($post->status)->toBe('Published')
-        ->and($post->published_at)->not->toBeNull();
+        ->and($post->published_at)->not->toBeNull()
+        ->and($post->published_at->lte(now()->addMinute()))->toBeTrue();
+});
+
+it('bisa menjadwalkan publish berita', function () {
+    $user = User::factory()->redaktur()->create();
+    $jadwal = now()->addDay()->startOfHour();
+
+    actingAs($user);
+
+    Livewire::test(CreatePost::class)
+        ->fillForm([
+            'title' => 'Berita Terjadwal',
+            'slug' => 'berita-terjadwal',
+            'excerpt' => str_repeat('Ringkasan untuk jadwal tayang. ', 3),
+            'content' => '<p>'.str_repeat('Isi artikel untuk uji jadwal publish. ', 40).'</p>',
+        ])
+        ->callAction('publish', data: [
+            'when' => 'schedule',
+            'published_at' => $jadwal,
+        ])
+        ->assertHasNoFormErrors();
+
+    $post = Post::query()->where('slug', 'berita-terjadwal')->first();
+
+    expect($post)->not->toBeNull()
+        ->and($post->status)->toBe('Published')
+        ->and($post->published_at?->equalTo($jadwal))->toBeTrue();
 });
 
 it('membuka halaman edit tanpa memuat ulang berita terkait berlebih', function () {
@@ -150,7 +181,7 @@ it('membuka halaman edit tanpa memuat ulang berita terkait berlebih', function (
 
     Livewire::test(EditPost::class, ['record' => $post->getRouteKey()])
         ->assertSuccessful()
-        ->assertSee('Edit')
+        ->assertSee('Edit berita')
         ->assertSee('Publish')
         ->assertSee('Simpan (Draft)')
         ->assertSee('Batal')

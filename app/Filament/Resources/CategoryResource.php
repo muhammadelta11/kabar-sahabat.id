@@ -14,11 +14,13 @@ class CategoryResource extends Resource
 {
     protected static ?string $model = Category::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-tag';
+    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
 
     protected static ?string $modelLabel = 'Kanal';
 
     protected static ?string $pluralModelLabel = 'Kanal';
+
+    protected static ?string $navigationLabel = 'Kelola kanal';
 
     protected static ?string $navigationGroup = 'Redaksi';
 

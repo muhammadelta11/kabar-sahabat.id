@@ -112,6 +112,11 @@ class Post extends Model
         return $this->belongsToMany(Category::class);
     }
 
+    public function tags()
+    {
+        return $this->belongsToMany(Tag::class);
+    }
+
     public function relatedPosts()
     {
         return $this->belongsToMany(Post::class, 'post_related', 'post_id', 'related_post_id');
