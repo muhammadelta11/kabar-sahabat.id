@@ -116,7 +116,6 @@ class PostResource extends Resource
                 ])->schema([
                     Forms\Components\Group::make([
                         Forms\Components\Section::make('Naskah')
-                            ->description('Judul, ringkasan, dan isi artikel.')
                             ->schema([
                                 Forms\Components\TextInput::make('title')
                                     ->label('Judul')
@@ -140,12 +139,10 @@ class PostResource extends Resource
                                     ->required()
                                     ->maxLength(180)
                                     ->live(onBlur: true)
-                                    ->unique(ignoreRecord: true)
-                                    ->helperText('Otomatis dari judul. Boleh diedit manual.'),
+                                    ->unique(ignoreRecord: true),
                                 Forms\Components\Textarea::make('excerpt')
-                                    ->label('Ringkasan / meta deskripsi')
+                                    ->label('Ringkasan')
                                     ->rows(3)
-                                    ->helperText('Ideal 120–165 karakter untuk Google & share.')
                                     ->live(onBlur: true)
                                     ->columnSpanFull(),
                                 Forms\Components\RichEditor::make('content')
@@ -165,11 +162,9 @@ class PostResource extends Resource
                                         'strike',
                                         'underline',
                                         'undo',
-                                    ])
-                                    ->helperText('Pakai Heading 2/3 untuk subjudul. Caption gambar: teks di baris tepat di bawah gambar.'),
+                                    ]),
                             ]),
                         Forms\Components\Section::make('Analisa SEO')
-                            ->description('Diperbarui saat Anda keluar dari judul, slug, atau ringkasan.')
                             ->collapsed()
                             ->schema([
                                 Forms\Components\Placeholder::make('seo_analysis')

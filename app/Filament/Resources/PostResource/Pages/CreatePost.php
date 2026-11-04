@@ -4,12 +4,15 @@ namespace App\Filament\Resources\PostResource\Pages;
 
 use App\Filament\Resources\PostResource;
 use App\Support\AutoRelatedPosts;
+use Filament\Actions\Action;
 use Filament\Resources\Pages\CreateRecord;
 use Filament\Support\Enums\MaxWidth;
 
 class CreatePost extends CreateRecord
 {
     protected static string $resource = PostResource::class;
+
+    protected static bool $canCreateAnother = false;
 
     public function getTitle(): string
     {
@@ -23,12 +26,24 @@ class CreatePost extends CreateRecord
 
     public function getSubheading(): ?string
     {
-        return 'Tulis naskah dulu, lalu lengkapi publikasi & gambar. Simpan sebagai Draft jika belum siap tayang.';
+        return null;
     }
 
     public function getMaxContentWidth(): MaxWidth|string|null
     {
         return MaxWidth::Full;
+    }
+
+    /**
+     * @return array<Action>
+     */
+    protected function getFormActions(): array
+    {
+        return [
+            $this->getCreateFormAction()
+                ->label('Simpan')
+                ->icon('heroicon-m-check'),
+        ];
     }
 
     protected function mutateFormDataBeforeCreate(array $data): array

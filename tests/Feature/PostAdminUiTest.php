@@ -71,11 +71,16 @@ it('membuka form tulis berita dengan layout naskah dan publikasi', function () {
     Livewire::test(CreatePost::class)
         ->assertSuccessful()
         ->assertSee('Tulis Berita')
+        ->assertSee('Simpan')
+        ->assertDontSee('Buat & buat lainnya')
+        ->assertDontSee('Ideal 120')
         ->assertFormFieldExists('title')
         ->assertFormFieldExists('content')
         ->assertFormFieldExists('status')
         ->assertFormFieldExists('categories')
         ->assertFormFieldExists('image_url');
+
+    expect(CreatePost::canCreateAnother())->toBeFalse();
 });
 
 it('menyimpan berita baru sebagai draft dan mengarahkan ke edit', function () {
