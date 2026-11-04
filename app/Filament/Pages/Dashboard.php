@@ -2,11 +2,14 @@
 
 namespace App\Filament\Pages;
 
+use App\Filament\Resources\PostResource;
 use App\Filament\Widgets\EditorialQueueOverview;
 use App\Filament\Widgets\PopularPostsTable;
+use App\Filament\Widgets\QuickComposeWidget;
 use App\Filament\Widgets\RedakturPerformanceTable;
 use App\Filament\Widgets\StatsOverview;
 use App\Filament\Widgets\ViewsChart;
+use Filament\Actions;
 use Filament\Pages\Dashboard as BaseDashboard;
 
 class Dashboard extends BaseDashboard
@@ -39,6 +42,26 @@ class Dashboard extends BaseDashboard
         return "Panel {$role} · ".now()->translatedFormat('l, d F Y').' · fokus kerja yang nyaman dan ringkas';
     }
 
+    protected function getHeaderActions(): array
+    {
+        if (! PostResource::canViewAny()) {
+            return [];
+        }
+
+        return [
+            Actions\Action::make('buatBerita')
+                ->label('Buat Berita')
+                ->icon('heroicon-m-pencil-square')
+                ->color('warning')
+                ->url(PostResource::getUrl('create')),
+            Actions\Action::make('kelolaBerita')
+                ->label('Kelola Berita')
+                ->icon('heroicon-m-newspaper')
+                ->color('gray')
+                ->url(PostResource::getUrl('index')),
+        ];
+    }
+
     public function getColumns(): int|string|array
     {
         return [
@@ -48,13 +71,12 @@ class Dashboard extends BaseDashboard
     }
 
     /**
-     * Widget bisnis (iklan/MRR) tetap di menu Analytics — beranda hanya ringkas editorial.
-     *
      * @return array<class-string>
      */
     public function getWidgets(): array
     {
         return [
+            QuickComposeWidget::class,
             EditorialQueueOverview::class,
             StatsOverview::class,
             ViewsChart::class,

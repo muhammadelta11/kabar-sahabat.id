@@ -99,7 +99,7 @@ class AdminPanelProvider extends PanelProvider
         FilamentView::registerRenderHook(
             PanelsRenderHook::STYLES_AFTER,
             fn (): string => new HtmlString(
-                '<link rel="stylesheet" href="'.asset('css/filament-admin.css').'?v=7">'
+                '<link rel="stylesheet" href="'.asset('css/filament-admin.css').'?v=8">'
             ),
         );
 
@@ -113,6 +113,11 @@ class AdminPanelProvider extends PanelProvider
                     Preview Situs
                 </a>
             HTML),
+        );
+
+        FilamentView::registerRenderHook(
+            PanelsRenderHook::BODY_END,
+            fn (): string => view('filament.components.mobile-bottom-nav')->render(),
         );
 
         FilamentView::registerRenderHook(

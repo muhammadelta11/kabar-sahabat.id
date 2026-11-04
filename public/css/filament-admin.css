@@ -575,7 +575,7 @@ textarea.fi-input {
     line-height: 1.35;
 }
 
-/* Create / edit berita: editor nyaman, sidebar meta rapat */
+/* Create / edit berita: editor nyaman */
 .fi-resource-posts .fi-fo-rich-editor .fi-fo-rich-editor-main,
 .fi-resource-create-record-post .fi-fo-rich-editor .fi-fo-rich-editor-main,
 .fi-resource-edit-record-post .fi-fo-rich-editor .fi-fo-rich-editor-main {
@@ -587,10 +587,180 @@ textarea.fi-input {
     scroll-margin-top: 5rem;
 }
 
+/* ===== Mobile bottom nav (app-like) ===== */
+.ks-mobile-bottom-nav {
+    display: none;
+}
+
 @media (max-width: 1023px) {
+    .ks-mobile-bottom-nav {
+        display: grid;
+        grid-template-columns: repeat(5, minmax(0, 1fr));
+        position: fixed;
+        inset-inline: 0;
+        bottom: 0;
+        z-index: 60;
+        height: calc(3.75rem + env(safe-area-inset-bottom, 0px));
+        padding: 0.35rem 0.25rem calc(0.35rem + env(safe-area-inset-bottom, 0px));
+        background: var(--ks-card);
+        border-top: 1px solid var(--ks-border);
+        box-shadow: 0 -8px 24px -16px rgb(15 23 42 / 0.35);
+    }
+
+    .ks-mbn-item {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 0.15rem;
+        min-width: 0;
+        color: var(--ks-muted);
+        text-decoration: none;
+        font-size: 0.62rem;
+        font-weight: 700;
+        letter-spacing: 0.02em;
+        background: transparent;
+        border: 0;
+        cursor: pointer;
+        -webkit-tap-highlight-color: transparent;
+    }
+
+    .ks-mbn-item svg {
+        width: 1.25rem;
+        height: 1.25rem;
+    }
+
+    .ks-mbn-item.is-active {
+        color: var(--ks-brand);
+    }
+
+    .dark .ks-mbn-item.is-active {
+        color: #93c5fd;
+    }
+
+    .ks-mbn-compose {
+        position: relative;
+        top: -0.85rem;
+    }
+
+    .ks-mbn-compose-btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 3rem;
+        height: 3rem;
+        border-radius: 9999px;
+        background: linear-gradient(135deg, var(--ks-brand) 0%, var(--ks-brand-dark) 100%);
+        color: #fff;
+        border: 3px solid var(--ks-card);
+        box-shadow: 0 10px 20px -10px rgb(0 51 153 / 0.7);
+    }
+
+    .ks-mbn-compose.is-active .ks-mbn-compose-btn {
+        background: linear-gradient(135deg, var(--ks-accent) 0%, #ea580c 100%);
+    }
+
+    .ks-mbn-compose span:last-child {
+        margin-top: -0.15rem;
+    }
+
+    /* Ruang konten di atas bottom nav */
+    .fi-main,
+    .fi-body {
+        padding-bottom: calc(4.75rem + env(safe-area-inset-bottom, 0px)) !important;
+    }
+
+    /* Writer mode: maksimalkan ruang create/edit berita */
+    .fi-resource-create-record-post .fi-page-header,
+    .fi-resource-edit-record-post .fi-page-header {
+        margin-bottom: 0.25rem !important;
+        gap: 0.35rem !important;
+    }
+
+    .fi-resource-create-record-post .fi-header-heading,
+    .fi-resource-edit-record-post .fi-header-heading {
+        font-size: 1.25rem !important;
+        line-height: 1.3 !important;
+    }
+
+    .fi-resource-create-record-post .fi-header-subheading,
+    .fi-resource-edit-record-post .fi-header-subheading {
+        font-size: 0.78rem !important;
+    }
+
+    .fi-resource-create-record-post .fi-breadcrumbs,
+    .fi-resource-edit-record-post .fi-breadcrumbs {
+        display: none !important;
+    }
+
     .fi-resource-create-record-post .fi-page-content,
     .fi-resource-edit-record-post .fi-page-content {
-        gap: 1rem !important;
+        gap: 0.65rem !important;
+        padding-inline: 0 !important;
+    }
+
+    .fi-resource-create-record-post .fi-section,
+    .fi-resource-edit-record-post .fi-section,
+    .fi-resource-create-record-post .fi-wi-widget,
+    .fi-resource-edit-record-post .fi-wi-widget {
+        border-radius: 0 !important;
+        border-inline: 0 !important;
+        box-shadow: none !important;
+    }
+
+    .fi-resource-create-record-post .fi-section-content-ctn,
+    .fi-resource-edit-record-post .fi-section-content-ctn,
+    .fi-resource-create-record-post .fi-fo-component-ctn,
+    .fi-resource-edit-record-post .fi-fo-component-ctn {
+        padding-inline: 0.75rem !important;
+    }
+
+    .fi-resource-create-record-post .fi-fo-rich-editor .fi-fo-rich-editor-main,
+    .fi-resource-edit-record-post .fi-fo-rich-editor .fi-fo-rich-editor-main {
+        min-height: min(62vh, 28rem) !important;
+        border-radius: 0.75rem !important;
+    }
+
+    .fi-resource-create-record-post .fi-fo-field-wrp-label,
+    .fi-resource-edit-record-post .fi-fo-field-wrp-label {
+        margin-bottom: 0.25rem !important;
+    }
+
+    .fi-resource-create-record-post .fi-input,
+    .fi-resource-edit-record-post .fi-input,
+    .fi-resource-create-record-post textarea.fi-input,
+    .fi-resource-edit-record-post textarea.fi-input {
+        font-size: 1rem !important;
+    }
+
+    /* Sticky save bar di atas bottom nav */
+    .fi-resource-create-record-post .fi-form-actions,
+    .fi-resource-edit-record-post .fi-form-actions {
+        position: sticky;
+        bottom: calc(4.1rem + env(safe-area-inset-bottom, 0px));
+        z-index: 40;
+        margin-inline: 0 !important;
+        padding: 0.65rem 0.75rem !important;
+        background: color-mix(in srgb, var(--ks-card) 92%, transparent);
+        backdrop-filter: blur(10px);
+        border-top: 1px solid var(--ks-border);
+        border-radius: 0 !important;
+    }
+
+    .fi-resource-create-record-post .fi-form-actions .fi-btn,
+    .fi-resource-edit-record-post .fi-form-actions .fi-btn {
+        min-height: 2.65rem;
+        flex: 1 1 auto;
+    }
+
+    /* Dashboard CTA sedikit lebih padat di HP */
+    .ks-quick-compose {
+        border-radius: 1rem !important;
+    }
+
+    #btn-lihat-situs span,
+    #btn-lihat-situs {
+        display: none !important;
     }
 }
 

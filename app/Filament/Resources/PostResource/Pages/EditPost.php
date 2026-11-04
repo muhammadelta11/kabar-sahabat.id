@@ -6,6 +6,7 @@ use App\Filament\Resources\PostResource;
 use App\Support\AutoRelatedPosts;
 use Filament\Actions;
 use Filament\Resources\Pages\EditRecord;
+use Filament\Support\Enums\MaxWidth;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Str;
@@ -27,6 +28,11 @@ class EditPost extends EditRecord
     public function getSubheading(): ?string
     {
         return Str::limit((string) $this->record->title, 90);
+    }
+
+    public function getMaxContentWidth(): MaxWidth|string|null
+    {
+        return MaxWidth::Full;
     }
 
     protected function resolveRecord(int|string $key): Model

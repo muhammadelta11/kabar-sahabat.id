@@ -4,6 +4,7 @@ use App\Filament\Pages\Dashboard;
 use App\Filament\Widgets\BusinessStatsOverview;
 use App\Filament\Widgets\EditorialQueueOverview;
 use App\Filament\Widgets\PopularPostsTable;
+use App\Filament\Widgets\QuickComposeWidget;
 use App\Filament\Widgets\RedakturPerformanceTable;
 use App\Filament\Widgets\StatsOverview;
 use App\Filament\Widgets\ViewsChart;
@@ -30,10 +31,13 @@ it('menampilkan beranda admin dengan sapaan dan stylesheet premium', function ()
         ->toContain('Budi Redaktur')
         ->toContain('Panel Redaktur')
         ->toContain('css/filament-admin.css')
-        ->toContain('?v=7')
+        ->toContain('?v=8')
         ->toContain('ks-brand-logo--light')
         ->toContain('ks-brand-logo--dark')
-        ->toContain('images/brand/logo-dark.png');
+        ->toContain('images/brand/logo-dark.png')
+        ->toContain('Buat Berita')
+        ->toContain('ks-mobile-bottom-nav')
+        ->toContain('ks-quick-compose');
 });
 
 it('stylesheet admin memakai token light/dark tanpa mematikan warna stat', function () {
@@ -73,6 +77,7 @@ it('memuat widget editorial ringan tanpa widget bisnis di beranda', function () 
     $widgets = (new Dashboard)->getWidgets();
 
     expect($widgets)
+        ->toContain(QuickComposeWidget::class)
         ->toContain(EditorialQueueOverview::class)
         ->toContain(StatsOverview::class)
         ->toContain(ViewsChart::class)

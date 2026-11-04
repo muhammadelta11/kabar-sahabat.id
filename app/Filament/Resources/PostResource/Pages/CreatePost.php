@@ -5,6 +5,7 @@ namespace App\Filament\Resources\PostResource\Pages;
 use App\Filament\Resources\PostResource;
 use App\Support\AutoRelatedPosts;
 use Filament\Resources\Pages\CreateRecord;
+use Filament\Support\Enums\MaxWidth;
 
 class CreatePost extends CreateRecord
 {
@@ -22,7 +23,12 @@ class CreatePost extends CreateRecord
 
     public function getSubheading(): ?string
     {
-        return 'Naskah di kiri · publikasi, gambar, dan SEO di kanan. Simpan dulu sebagai Draft jika belum siap tayang.';
+        return 'Tulis naskah dulu, lalu lengkapi publikasi & gambar. Simpan sebagai Draft jika belum siap tayang.';
+    }
+
+    public function getMaxContentWidth(): MaxWidth|string|null
+    {
+        return MaxWidth::Full;
     }
 
     protected function mutateFormDataBeforeCreate(array $data): array

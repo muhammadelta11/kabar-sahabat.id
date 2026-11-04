@@ -170,6 +170,7 @@ class PostResource extends Resource
                             ]),
                         Forms\Components\Section::make('Analisa SEO')
                             ->description('Diperbarui saat Anda keluar dari judul, slug, atau ringkasan.')
+                            ->collapsed()
                             ->schema([
                                 Forms\Components\Placeholder::make('seo_analysis')
                                     ->hiddenLabel()
@@ -191,6 +192,7 @@ class PostResource extends Resource
 
                     Forms\Components\Group::make([
                         Forms\Components\Section::make('Publikasi')
+                            ->compact()
                             ->schema([
                                 Forms\Components\Select::make('status')
                                     ->options([
