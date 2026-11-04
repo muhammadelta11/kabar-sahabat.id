@@ -35,14 +35,19 @@ class SettingsController extends Controller
             'ga_measurement_id' => ['nullable', 'string', 'max:32', 'regex:/^G-[A-Z0-9]+$/i'],
             'ga_dashboard_url' => 'nullable|url|max:500',
             'ga_looker_embed_url' => 'nullable|url|max:500',
-            'logo' => 'nullable|image|max:2048',
+            'logo' => 'nullable|image|max:5120',
         ]);
 
         $setting = Setting::first() ?? new Setting;
 
         if ($request->hasFile('logo')) {
             Media::delete($setting->logo_path);
-            $setting->logo_path = Media::storeUploaded($request->file('logo'), 'settings');
+            // Logo situs: kompres tanpa watermark brand.
+            $setting->logo_path = Media::storeUploaded($request->file('logo'), 'settings', [
+                'max_width' => 800,
+                'max_height' => 800,
+                'watermark' => ['enabled' => false],
+            ]);
         }
 
         $setting->tagline = $request->tagline;

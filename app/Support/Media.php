@@ -97,8 +97,14 @@ class Media
         return $path;
     }
 
-    public static function storeUploaded(UploadedFile $file, string $directory): string
+    public static function storeUploaded(UploadedFile $file, string $directory, ?array $imageOptions = null): string
     {
+        $mime = $file->getMimeType() ?: '';
+
+        if (str_starts_with($mime, 'image/')) {
+            return MediaImageProcessor::store($file, $directory, $imageOptions);
+        }
+
         return $file->store($directory, [
             'disk' => self::diskName(),
             'visibility' => 'public',

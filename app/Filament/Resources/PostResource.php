@@ -6,6 +6,7 @@ use App\Filament\Resources\PostResource\Pages;
 use App\Models\Post;
 use App\Support\AutoRelatedPosts;
 use App\Support\EditorialInsights;
+use App\Support\MediaImageProcessor;
 use App\Support\PostSlug;
 use App\Support\RedakturOperationalRecap;
 use App\Support\SeoAnalyzer;
@@ -231,12 +232,13 @@ class PostResource extends Resource
                                     ->directory('posts')
                                     ->visibility('public')
                                     ->acceptedFileTypes(['image/jpeg', 'image/png', 'image/webp'])
-                                    ->maxSize(2048)
-                                    ->imageResizeMode('cover')
-                                    ->imageCropAspectRatio('16:9')
-                                    ->imageResizeTargetWidth('1200')
-                                    ->imageResizeTargetHeight('675')
-                                    ->helperText('Maks. 2MB · 16:9 · 1200×675'),
+                                    ->maxSize(5120)
+                                    ->saveUploadedFileUsing(MediaImageProcessor::filamentSaver('posts'))
+                                    ->helperText('JPG/PNG/WebP maks. 5MB. Sistem otomatis kompres + watermark tanpa merusak ketajaman visual.')
+                                    ->validationMessages([
+                                        'max' => 'Gambar terlalu besar (maks. 5MB). Sistem akan mengompres setelah diunggah.',
+                                        'mimetypes' => 'Format gambar harus JPG, PNG, atau WebP.',
+                                    ]),
                                 Forms\Components\TextInput::make('image_caption')
                                     ->label('Caption')
                                     ->placeholder('Contoh: Foto: Dok. PMII Walisongo'),

@@ -216,13 +216,50 @@ document.addEventListener('DOMContentLoaded', function () {
     var bacaJugaItems = document.querySelectorAll('#baca-juga-data .baca-juga-item');
     if (!article || bacaJugaItems.length === 0) return;
 
-    var paragraphs = article.querySelectorAll('p');
-    if (paragraphs.length >= 2 && bacaJugaItems.length >= 1) {
-        paragraphs[1].insertAdjacentHTML('afterend', bacaJugaItems[0].innerHTML);
+    var paragraphs = Array.from(article.querySelectorAll('p'));
+    var count = bacaJugaItems.length;
+
+    // Artikel pendek: sisipkan semua di akhir isi agar tetap tampil minimal 3.
+    if (paragraphs.length < 2) {
+        for (var i = 0; i < count; i++) {
+            article.insertAdjacentHTML('beforeend', bacaJugaItems[i].innerHTML);
+        }
+        return;
     }
-    if (paragraphs.length >= 5 && bacaJugaItems.length >= 2) {
-        paragraphs[4].insertAdjacentHTML('afterend', bacaJugaItems[1].innerHTML);
+
+    var used = Object.create(null);
+    var plan = [];
+
+    for (var i = 0; i < count; i++) {
+        // Sebar rata: posisi ke-(i+1) dari (count+1) segmen artikel.
+        var idx = Math.round((i + 1) * paragraphs.length / (count + 1)) - 1;
+        idx = Math.max(0, Math.min(paragraphs.length - 1, idx));
+
+        while (used[idx] && idx < paragraphs.length - 1) {
+            idx++;
+        }
+
+        if (used[idx]) {
+            plan.push({ mode: 'end', html: bacaJugaItems[i].innerHTML });
+            continue;
+        }
+
+        used[idx] = true;
+        plan.push({ mode: 'after', index: idx, html: bacaJugaItems[i].innerHTML });
     }
+
+    plan
+        .filter(function (slot) { return slot.mode === 'after'; })
+        .sort(function (a, b) { return b.index - a.index; })
+        .forEach(function (slot) {
+            paragraphs[slot.index].insertAdjacentHTML('afterend', slot.html);
+        });
+
+    plan
+        .filter(function (slot) { return slot.mode === 'end'; })
+        .forEach(function (slot) {
+            article.insertAdjacentHTML('beforeend', slot.html);
+        });
 });
 </script>
 

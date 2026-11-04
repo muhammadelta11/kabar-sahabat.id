@@ -64,17 +64,20 @@ return [
     */
 
     'temporary_file_upload' => [
-        'disk' => 'local',     // Livewire serves temp previews via signed URLs, not direct disk access
-        'rules' => null,       // Example: ['file', 'mimes:png,jpg']  | Default: ['required', 'file', 'max:12288'] (12MB)
-        'directory' => 'livewire-tmp',
-        'middleware' => null,  // Example: 'throttle:5,1'             | Default: 'throttle:60,1'
-        'preview_mimes' => [   // Supported file types for temporary pre-signed file URLs...
+        // Disk khusus (storage/app/livewire-tmp) — lebih stabil di shared hosting.
+        'disk' => 'livewire',
+        // Batasi sejak upload awal agar file oversized ditolak sebelum form disimpan.
+        'rules' => ['required', 'file', 'max:5120', 'mimes:jpg,jpeg,png,webp'],
+        'directory' => null, // root disk sudah livewire-tmp
+        'middleware' => null,
+        'preview_mimes' => [
             'png', 'gif', 'bmp', 'svg', 'wav', 'mp4',
             'mov', 'avi', 'wmv', 'mp3', 'm4a',
             'jpg', 'jpeg', 'mpga', 'webp', 'wma',
         ],
-        'max_upload_time' => 5, // Max duration (in minutes) before an upload is invalidated...
-        'cleanup' => true, // Should cleanup temporary uploads older than 24 hrs...
+        // Form berita sering diisi lama setelah pilih gambar.
+        'max_upload_time' => 30,
+        'cleanup' => true,
     ],
 
     /*

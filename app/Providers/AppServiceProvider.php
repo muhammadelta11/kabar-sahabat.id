@@ -9,6 +9,7 @@ use App\Models\Post;
 use App\Models\Setting;
 use App\Observers\NewsCacheObserver;
 use App\Support\NewsCache;
+use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
@@ -28,6 +29,12 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        // Pastikan folder temp Livewire ada & writable (penyebab umum 500 upload di hosting).
+        $livewireTmp = storage_path('app/livewire-tmp');
+        if (! File::isDirectory($livewireTmp)) {
+            File::makeDirectory($livewireTmp, 0755, true);
+        }
+
         View::composer('*', function ($view): void {
             if (! Schema::hasTable('settings')) {
                 return;

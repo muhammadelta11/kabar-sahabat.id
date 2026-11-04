@@ -25,7 +25,7 @@
                 <div>
                     <label class="fi-fo-field-wrp-label inline-flex items-center gap-x-3 mb-1">
                         <span class="text-sm font-medium leading-6 text-gray-950 dark:text-white">Logo Website</span>
-                        <span class="text-xs text-gray-500">(JPG/PNG, maks 2MB)</span>
+                        <span class="text-xs text-gray-500">(JPG/PNG/WebP, maks 5MB · dikompres otomatis)</span>
                     </label>
                     @if($setting->logo_path && \App\Support\Media::exists($setting->logo_path))
                         <div class="mb-2 flex items-center gap-3">

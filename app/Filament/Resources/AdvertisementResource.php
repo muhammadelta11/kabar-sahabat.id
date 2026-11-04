@@ -4,6 +4,7 @@ namespace App\Filament\Resources;
 
 use App\Filament\Resources\AdvertisementResource\Pages;
 use App\Models\Advertisement;
+use App\Support\MediaImageProcessor;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
@@ -79,7 +80,12 @@ class AdvertisementResource extends Resource
                     ->directory('ads')
                     ->visibility('public')
                     ->acceptedFileTypes(['image/jpeg', 'image/png', 'image/webp'])
-                    ->maxSize(2048)
+                    ->maxSize(5120)
+                    ->saveUploadedFileUsing(MediaImageProcessor::filamentSaver('ads', [
+                        'max_width' => 1920,
+                        'max_height' => 1080,
+                    ]))
+                    ->helperText('Otomatis dikompres + watermark. Maks. upload 5MB.')
                     ->visible(fn (Forms\Get $get) => $get('type') === 'image')
                     ->columnSpanFull(),
                 Forms\Components\TextInput::make('link_url')
