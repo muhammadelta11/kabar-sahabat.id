@@ -68,7 +68,8 @@ class NewsController extends Controller
             abort(404);
         }
 
-        RecordPostView::dispatch($post->id);
+        // Sync: andalkan tanpa queue worker (shared hosting). Satu INSERT+UPDATE, ringan.
+        RecordPostView::dispatchSync($post->id);
 
         $bacaJugaLimit = AutoRelatedPosts::LIMIT;
 

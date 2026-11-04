@@ -21,7 +21,10 @@ class PopularPostsTable extends BaseWidget
 
     public static function canView(): bool
     {
-        return auth()->user()?->canAccess('view_editorial_dashboard') ?? false;
+        $user = auth()->user();
+
+        return ($user?->canAccess('view_editorial_dashboard')
+            || $user?->canAccess('view_business_dashboard')) ?? false;
     }
 
     public static function cacheKey(): string

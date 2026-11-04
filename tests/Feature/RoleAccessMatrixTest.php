@@ -52,12 +52,20 @@ it('menampilkan widget dashboard sesuai role', function (UserRole $role, array $
 
     expect(BusinessStatsOverview::canView())->toBe($expected['business'])
         ->and(EditorialQueueOverview::canView())->toBe($expected['editorial'])
-        ->and(StatsOverview::canView())->toBe($expected['editorial'])
-        ->and(PopularPostsTable::canView())->toBe($expected['editorial'])
+        ->and(StatsOverview::canView())->toBe($expected['readers'])
+        ->and(PopularPostsTable::canView())->toBe($expected['readers'])
         ->and(RedakturPerformanceTable::canView())->toBe($expected['performance']);
 })->with([
-    'super_admin' => [UserRole::SuperAdmin, ['business' => true, 'editorial' => true, 'performance' => true]],
-    'direktur' => [UserRole::Direktur, ['business' => true, 'editorial' => false, 'performance' => true]],
-    'pimpinan_redaktur' => [UserRole::PimpinanRedaktur, ['business' => false, 'editorial' => true, 'performance' => true]],
-    'redaktur' => [UserRole::Redaktur, ['business' => false, 'editorial' => true, 'performance' => false]],
+    'super_admin' => [UserRole::SuperAdmin, [
+        'business' => true, 'editorial' => true, 'readers' => true, 'performance' => true,
+    ]],
+    'direktur' => [UserRole::Direktur, [
+        'business' => true, 'editorial' => false, 'readers' => true, 'performance' => true,
+    ]],
+    'pimpinan_redaktur' => [UserRole::PimpinanRedaktur, [
+        'business' => false, 'editorial' => true, 'readers' => true, 'performance' => true,
+    ]],
+    'redaktur' => [UserRole::Redaktur, [
+        'business' => false, 'editorial' => true, 'readers' => true, 'performance' => false,
+    ]],
 ]);

@@ -4,21 +4,17 @@ namespace App\Jobs;
 
 use App\Models\Post;
 use App\Models\PostView;
-use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Queue\Queueable;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Log;
 use Throwable;
 
-class RecordPostView implements ShouldQueue
+/**
+ * Catat tayangan artikel tanpa mengandalkan queue worker (dispatchSync).
+ */
+class RecordPostView
 {
     use Queueable;
-
-    public int $tries = 3;
-
-    /** @var list<int> */
-    public array $backoff = [1, 5, 15];
-
-    public int $timeout = 30;
 
     public function __construct(public int $postId) {}
 
@@ -34,6 +30,11 @@ class RecordPostView implements ShouldQueue
             'post_id' => $this->postId,
             'viewed_at' => now(),
         ]);
+
+        Cache::forget('admin.stats_overview');
+        Cache::forget('admin.views_chart_7d');
+        Cache::forget('admin.business_stats.v2');
+        Cache::forget('admin.popular_posts_top5');
     }
 
     public function failed(?Throwable $exception): void

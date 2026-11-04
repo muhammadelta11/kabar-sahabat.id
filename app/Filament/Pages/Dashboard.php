@@ -3,6 +3,7 @@
 namespace App\Filament\Pages;
 
 use App\Filament\Resources\PostResource;
+use App\Filament\Widgets\BusinessStatsOverview;
 use App\Filament\Widgets\EditorialQueueOverview;
 use App\Filament\Widgets\PopularPostsTable;
 use App\Filament\Widgets\QuickComposeWidget;
@@ -79,6 +80,7 @@ class Dashboard extends BaseDashboard
             QuickComposeWidget::class,
             EditorialQueueOverview::class,
             StatsOverview::class,
+            BusinessStatsOverview::class,
             ViewsChart::class,
             RedakturPerformanceTable::class,
             PopularPostsTable::class,

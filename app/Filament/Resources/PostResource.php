@@ -216,7 +216,8 @@ class PostResource extends Resource
                                     ->multiple()
                                     ->preload()
                                     ->searchable()
-                                    ->native(false),
+                                    ->native(false)
+                                    ->extraAttributes(['class' => 'ks-kanal-select']),
                                 Forms\Components\TextInput::make('views_count')
                                     ->label('Views')
                                     ->numeric()

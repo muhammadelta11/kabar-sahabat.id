@@ -34,6 +34,9 @@ class BusinessStatsOverview extends BaseWidget
                     ->where('is_active', true)
                     ->whereNotNull('monthly_rate')
                     ->sum('monthly_rate'),
+                'views_today' => PostView::query()
+                    ->where('viewed_at', '>=', now()->startOfDay())
+                    ->count(),
                 'views_week' => PostView::query()
                     ->where('viewed_at', '>=', now()->subDays(7)->startOfDay())
                     ->count(),
@@ -45,18 +48,18 @@ class BusinessStatsOverview extends BaseWidget
         $gaReady = filled($settings->ga_measurement_id) || filled($settings->analytics_code);
 
         return [
-            Stat::make('Iklan Aktif', number_format($stats['active_ads']))
-                ->description('Dari '.$stats['total_ads'].' slot terdaftar')
-                ->descriptionIcon('heroicon-m-megaphone')
-                ->color('warning'),
-            Stat::make('Estimasi MRR', Number::currency($stats['mrr'], 'IDR', 'id'))
-                ->description('Jumlah tarif bulanan iklan aktif')
-                ->descriptionIcon('heroicon-m-banknotes')
+            Stat::make('Pembaca Hari Ini', number_format($stats['views_today']))
+                ->description('Kunjungan artikel hari ini')
+                ->descriptionIcon('heroicon-m-eye')
                 ->color('success'),
             Stat::make('Pembaca 7 Hari', number_format($stats['views_week']))
                 ->description('Tayangan artikel internal')
                 ->descriptionIcon('heroicon-m-chart-bar')
                 ->color('info'),
+            Stat::make('Iklan Aktif', number_format($stats['active_ads']))
+                ->description('Dari '.$stats['total_ads'].' slot · MRR '.Number::currency($stats['mrr'], 'IDR', 'id'))
+                ->descriptionIcon('heroicon-m-megaphone')
+                ->color('warning'),
             Stat::make('Google Analytics', $gaReady ? 'Terhubung' : 'Belum')
                 ->description($gaReady
                     ? ($settings->ga_measurement_id ?: 'Snippet tracking aktif')

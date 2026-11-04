@@ -221,7 +221,23 @@
     box-shadow: var(--ks-shadow-soft) !important;
     border: 1px solid var(--ks-border) !important;
     background: var(--ks-card) !important;
+}
+
+/* Jangan clip dropdown Select (kanal, status, dll.) */
+.fi-section,
+.fi-wi-widget {
+    overflow: visible;
+}
+
+.fi-ta-ctn {
     overflow: hidden;
+}
+
+/* Panel Select Filament di atas sticky save / bottom nav */
+.fi-dropdown-panel,
+.fi-fo-select-panel,
+ul[role="listbox"] {
+    z-index: 80 !important;
 }
 
 .fi-section-header,
@@ -577,13 +593,13 @@ textarea.fi-input {
 
 /* Create / edit berita: editor nyaman */
 .fi-resource-posts .fi-fo-rich-editor .fi-fo-rich-editor-main,
-.fi-resource-create-record-post .fi-fo-rich-editor .fi-fo-rich-editor-main,
-.fi-resource-edit-record-post .fi-fo-rich-editor .fi-fo-rich-editor-main {
+.fi-resource-create-record-page.fi-resource-posts .fi-fo-rich-editor .fi-fo-rich-editor-main,
+.fi-resource-edit-record-page.fi-resource-posts .fi-fo-rich-editor .fi-fo-rich-editor-main {
     min-height: 22rem;
 }
 
-.fi-resource-create-record-post .fi-section,
-.fi-resource-edit-record-post .fi-section {
+.fi-resource-create-record-page.fi-resource-posts .fi-section,
+.fi-resource-edit-record-page.fi-resource-posts .fi-section {
     scroll-margin-top: 5rem;
 }
 
@@ -670,97 +686,282 @@ textarea.fi-input {
         padding-bottom: calc(4.75rem + env(safe-area-inset-bottom, 0px)) !important;
     }
 
-    /* Writer mode: maksimalkan ruang create/edit berita */
-    .fi-resource-create-record-post .fi-page-header,
-    .fi-resource-edit-record-post .fi-page-header {
-        margin-bottom: 0.25rem !important;
-        gap: 0.35rem !important;
+    /* Writer mode: full-bleed HP — hilangkan gutter Filament .fi-main px-4 */
+    body:has(.fi-resource-create-record-page.fi-resource-posts) .fi-main,
+    body:has(.fi-resource-edit-record-page.fi-resource-posts) .fi-main {
+        padding-left: 0 !important;
+        padding-right: 0 !important;
+        max-width: 100% !important;
     }
 
-    .fi-resource-create-record-post .fi-header-heading,
-    .fi-resource-edit-record-post .fi-header-heading {
-        font-size: 1.25rem !important;
-        line-height: 1.3 !important;
+    .fi-resource-create-record-page.fi-resource-posts,
+    .fi-resource-edit-record-page.fi-resource-posts {
+        width: 100% !important;
+        max-width: 100% !important;
+        padding-inline: 0 !important;
+        margin-inline: 0 !important;
     }
 
-    .fi-resource-create-record-post .fi-header-subheading,
-    .fi-resource-edit-record-post .fi-header-subheading {
-        font-size: 0.78rem !important;
+    .fi-resource-create-record-page.fi-resource-posts .fi-page-header,
+    .fi-resource-edit-record-page.fi-resource-posts .fi-page-header {
+        margin-bottom: 0.15rem !important;
+        gap: 0.25rem !important;
+        padding-inline: 0.5rem !important;
     }
 
-    .fi-resource-create-record-post .fi-breadcrumbs,
-    .fi-resource-edit-record-post .fi-breadcrumbs {
+    .fi-resource-create-record-page.fi-resource-posts .fi-header-heading,
+    .fi-resource-edit-record-page.fi-resource-posts .fi-header-heading {
+        font-size: 1.2rem !important;
+        line-height: 1.25 !important;
+    }
+
+    .fi-resource-create-record-page.fi-resource-posts .fi-header-subheading,
+    .fi-resource-edit-record-page.fi-resource-posts .fi-header-subheading {
+        font-size: 0.75rem !important;
+    }
+
+    .fi-resource-create-record-page.fi-resource-posts .fi-breadcrumbs,
+    .fi-resource-edit-record-page.fi-resource-posts .fi-breadcrumbs,
+    .fi-resource-create-record-page.fi-resource-posts .fi-header-actions,
+    .fi-resource-edit-record-page.fi-resource-posts .fi-header-actions {
         display: none !important;
     }
 
-    .fi-resource-create-record-post .fi-page-content,
-    .fi-resource-edit-record-post .fi-page-content {
-        gap: 0.65rem !important;
+    .fi-resource-create-record-page.fi-resource-posts .fi-page-content,
+    .fi-resource-edit-record-page.fi-resource-posts .fi-page-content {
+        gap: 0.5rem !important;
         padding-inline: 0 !important;
+        margin-inline: 0 !important;
+        width: 100% !important;
+        max-width: 100% !important;
     }
 
-    .fi-resource-create-record-post .fi-section,
-    .fi-resource-edit-record-post .fi-section,
-    .fi-resource-create-record-post .fi-wi-widget,
-    .fi-resource-edit-record-post .fi-wi-widget {
+    .fi-resource-create-record-page.fi-resource-posts .fi-section,
+    .fi-resource-edit-record-page.fi-resource-posts .fi-section,
+    .fi-resource-create-record-page.fi-resource-posts .fi-wi-widget,
+    .fi-resource-edit-record-page.fi-resource-posts .fi-wi-widget {
         border-radius: 0 !important;
         border-inline: 0 !important;
         box-shadow: none !important;
+        margin-inline: 0 !important;
+        width: 100% !important;
+        max-width: 100% !important;
     }
 
-    .fi-resource-create-record-post .fi-section-content-ctn,
-    .fi-resource-edit-record-post .fi-section-content-ctn,
-    .fi-resource-create-record-post .fi-fo-component-ctn,
-    .fi-resource-edit-record-post .fi-fo-component-ctn {
-        padding-inline: 0.75rem !important;
+    .fi-resource-create-record-page.fi-resource-posts .fi-section-header,
+    .fi-resource-edit-record-page.fi-resource-posts .fi-section-header {
+        padding-inline: 0.5rem !important;
+        padding-block: 0.45rem !important;
     }
 
-    .fi-resource-create-record-post .fi-fo-rich-editor .fi-fo-rich-editor-main,
-    .fi-resource-edit-record-post .fi-fo-rich-editor .fi-fo-rich-editor-main {
-        min-height: min(62vh, 28rem) !important;
-        border-radius: 0.75rem !important;
+    .fi-resource-create-record-page.fi-resource-posts .fi-section-content-ctn,
+    .fi-resource-edit-record-page.fi-resource-posts .fi-section-content-ctn,
+    .fi-resource-create-record-page.fi-resource-posts .fi-section-content,
+    .fi-resource-edit-record-page.fi-resource-posts .fi-section-content,
+    .fi-resource-create-record-page.fi-resource-posts .fi-fo-component-ctn,
+    .fi-resource-edit-record-page.fi-resource-posts .fi-fo-component-ctn {
+        padding-inline: 0.35rem !important;
+        padding-block: 0.4rem !important;
     }
 
-    .fi-resource-create-record-post .fi-fo-field-wrp-label,
-    .fi-resource-edit-record-post .fi-fo-field-wrp-label {
-        margin-bottom: 0.25rem !important;
+    .fi-resource-create-record-page.fi-resource-posts .fi-fo-rich-editor,
+    .fi-resource-edit-record-page.fi-resource-posts .fi-fo-rich-editor {
+        margin-inline: 0 !important;
+        width: 100% !important;
+        max-width: 100% !important;
     }
 
-    .fi-resource-create-record-post .fi-input,
-    .fi-resource-edit-record-post .fi-input,
-    .fi-resource-create-record-post textarea.fi-input,
-    .fi-resource-edit-record-post textarea.fi-input {
-        font-size: 1rem !important;
+    .fi-resource-create-record-page.fi-resource-posts .fi-fo-rich-editor .fi-fo-rich-editor-main,
+    .fi-resource-edit-record-page.fi-resource-posts .fi-fo-rich-editor .fi-fo-rich-editor-main {
+        min-height: min(68vh, 32rem) !important;
+        border-radius: 0.4rem !important;
+        margin-inline: 0 !important;
+        width: 100% !important;
+        max-width: 100% !important;
     }
 
-    /* Sticky save bar di atas bottom nav */
-    .fi-resource-create-record-post .fi-form-actions,
-    .fi-resource-edit-record-post .fi-form-actions {
+    .fi-resource-create-record-page.fi-resource-posts .ProseMirror,
+    .fi-resource-edit-record-page.fi-resource-posts .ProseMirror {
+        padding-inline: 0.5rem !important;
+        font-size: 1.05rem !important;
+        line-height: 1.65 !important;
+    }
+
+    .fi-resource-create-record-page.fi-resource-posts .fi-fo-field-wrp-label,
+    .fi-resource-edit-record-page.fi-resource-posts .fi-fo-field-wrp-label {
+        margin-bottom: 0.2rem !important;
+    }
+
+    .fi-resource-create-record-page.fi-resource-posts .fi-input,
+    .fi-resource-edit-record-page.fi-resource-posts .fi-input,
+    .fi-resource-create-record-page.fi-resource-posts textarea.fi-input,
+    .fi-resource-edit-record-page.fi-resource-posts textarea.fi-input {
+        font-size: 1.05rem !important;
+    }
+
+    .fi-resource-create-record-page.fi-resource-posts .fi-fo-field-wrp-helper-text,
+    .fi-resource-edit-record-page.fi-resource-posts .fi-fo-field-wrp-helper-text {
+        font-size: 0.7rem !important;
+    }
+
+    /* Sticky save bar full width */
+    .fi-resource-create-record-page.fi-resource-posts .fi-form-actions,
+    .fi-resource-edit-record-page.fi-resource-posts .fi-form-actions {
         position: sticky;
         bottom: calc(4.1rem + env(safe-area-inset-bottom, 0px));
         z-index: 40;
         margin-inline: 0 !important;
-        padding: 0.65rem 0.75rem !important;
-        background: color-mix(in srgb, var(--ks-card) 92%, transparent);
+        width: 100% !important;
+        max-width: 100% !important;
+        padding: 0.55rem 0.5rem !important;
+        background: color-mix(in srgb, var(--ks-card) 94%, transparent);
         backdrop-filter: blur(10px);
         border-top: 1px solid var(--ks-border);
         border-radius: 0 !important;
     }
 
-    .fi-resource-create-record-post .fi-form-actions .fi-btn,
-    .fi-resource-edit-record-post .fi-form-actions .fi-btn {
-        min-height: 2.65rem;
-        flex: 1 1 auto;
+    .fi-resource-create-record-page.fi-resource-posts .fi-form-actions .fi-ac,
+    .fi-resource-edit-record-page.fi-resource-posts .fi-form-actions .fi-ac {
+        width: 100% !important;
+        gap: 0.4rem !important;
     }
 
-    /* Dashboard CTA sedikit lebih padat di HP */
-    .ks-quick-compose {
-        border-radius: 1rem !important;
+    .fi-resource-create-record-page.fi-resource-posts .fi-form-actions .fi-btn,
+    .fi-resource-edit-record-page.fi-resource-posts .fi-form-actions .fi-btn {
+        min-height: 2.75rem;
+        flex: 1 1 auto;
     }
 
     #btn-lihat-situs span,
     #btn-lihat-situs {
         display: none !important;
+    }
+}
+
+/* ===== Quick compose — warna eksplisit (light + dark), tanpa Tailwind purged ===== */
+.fi-wi-widget:has(.ks-quick-compose) {
+    background: transparent !important;
+    border: 0 !important;
+    box-shadow: none !important;
+    overflow: visible !important;
+}
+
+.ks-quick-compose {
+    border-radius: 1rem;
+    border: 1px solid rgb(0 51 153 / 0.22);
+    background: linear-gradient(135deg, #003399 0%, #002266 55%, #001a4d 100%);
+    padding: 1rem 1.1rem;
+    color: #ffffff !important;
+    box-shadow: 0 12px 28px -16px rgb(0 51 153 / 0.55);
+}
+
+.dark .ks-quick-compose {
+    border-color: rgb(147 197 253 / 0.28);
+    background: linear-gradient(135deg, #1e3a8a 0%, #172554 55%, #0f172a 100%);
+}
+
+.ks-quick-compose__row {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+@media (min-width: 640px) {
+    .ks-quick-compose {
+        padding: 1.15rem 1.25rem;
+    }
+
+    .ks-quick-compose__row {
+        flex-direction: row;
+        align-items: center;
+        justify-content: space-between;
+    }
+}
+
+.ks-quick-compose__copy {
+    min-width: 0;
+}
+
+.ks-quick-compose__eyebrow {
+    margin: 0;
+    font-size: 0.68rem;
+    font-weight: 800;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: #fdba74 !important;
+}
+
+.ks-quick-compose__title {
+    margin: 0.35rem 0 0;
+    font-size: 1.15rem;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    color: #ffffff !important;
+}
+
+.ks-quick-compose__desc {
+    margin: 0.35rem 0 0;
+    font-size: 0.875rem;
+    line-height: 1.45;
+    color: rgb(255 255 255 / 0.82) !important;
+}
+
+.ks-quick-compose__actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+
+.ks-quick-compose__btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    border-radius: 0.75rem;
+    padding: 0.65rem 1rem;
+    font-size: 0.875rem;
+    font-weight: 800;
+    text-decoration: none !important;
+    line-height: 1.2;
+    -webkit-tap-highlight-color: transparent;
+}
+
+.ks-quick-compose__btn--primary {
+    background: #ffffff !important;
+    color: #003399 !important;
+    border: 1px solid #ffffff !important;
+    box-shadow: 0 6px 14px -10px rgb(15 23 42 / 0.45);
+}
+
+.ks-quick-compose__btn--primary:hover {
+    background: #fff7ed !important;
+    color: #002266 !important;
+}
+
+.dark .ks-quick-compose__btn--primary {
+    background: #ffffff !important;
+    color: #1e3a8a !important;
+}
+
+.dark .ks-quick-compose__btn--primary:hover {
+    background: #eff6ff !important;
+    color: #172554 !important;
+}
+
+.ks-quick-compose__btn--ghost {
+    background: rgb(255 255 255 / 0.12) !important;
+    color: #ffffff !important;
+    border: 1px solid rgb(255 255 255 / 0.35) !important;
+}
+
+.ks-quick-compose__btn--ghost:hover {
+    background: rgb(255 255 255 / 0.22) !important;
+    color: #ffffff !important;
+}
+
+@media (max-width: 1023px) {
+    .ks-quick-compose {
+        border-radius: 1rem;
     }
 }
 

@@ -28,10 +28,9 @@ it('mencatat satu post view saat artikel dibaca', function () {
 it('grafik pembaca harian menghitung view hari ini', function () {
     $post = createPublishedPost();
 
-    get(route('news.show', $post->slug));
-    get(route('news.show', $post->slug));
+    get(route('news.show', $post->slug))->assertSuccessful();
+    get(route('news.show', $post->slug))->assertSuccessful();
 
-    $today = now()->startOfDay();
-
-    expect(PostView::whereBetween('viewed_at', [$today, $today->copy()->endOfDay()])->count())->toBe(2);
+    expect(PostView::where('post_id', $post->id)->count())->toBe(2)
+        ->and(PostView::query()->where('viewed_at', '>=', now()->startOfDay())->count())->toBe(2);
 });

@@ -5,24 +5,26 @@ use App\Models\Post;
 use App\Models\PostView;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Support\Facades\Queue;
+use Illuminate\Support\Facades\Cache;
 
 use function Pest\Laravel\get;
 
 uses(RefreshDatabase::class);
 
-it('mengantri RecordPostView saat artikel dibuka', function () {
-    Queue::fake();
-
+it('mencatat view artikel secara sync tanpa mengandalkan queue worker', function () {
     $post = Post::factory()->create([
         'status' => 'Published',
         'user_id' => User::factory()->create()->id,
         'views_count' => 0,
     ]);
 
+    Cache::put('admin.stats_overview', ['today' => 0], 60);
+
     get(route('news.show', $post->slug))->assertSuccessful();
 
-    Queue::assertPushed(RecordPostView::class, fn (RecordPostView $job) => $job->postId === $post->id);
+    expect(PostView::where('post_id', $post->id)->count())->toBe(1)
+        ->and($post->fresh()->views_count)->toBe(1)
+        ->and(Cache::has('admin.stats_overview'))->toBeFalse();
 });
 
 it('menambah views_count dan baris post_views', function () {

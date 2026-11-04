@@ -99,7 +99,7 @@ class AdminPanelProvider extends PanelProvider
         FilamentView::registerRenderHook(
             PanelsRenderHook::STYLES_AFTER,
             fn (): string => new HtmlString(
-                '<link rel="stylesheet" href="'.asset('css/filament-admin.css').'?v=8">'
+                '<link rel="stylesheet" href="'.asset('css/filament-admin.css').'?v=11">'
             ),
         );
 
