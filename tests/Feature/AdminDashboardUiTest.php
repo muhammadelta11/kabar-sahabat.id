@@ -31,7 +31,7 @@ it('menampilkan beranda admin dengan sapaan dan stylesheet premium', function ()
         ->toContain('Budi Redaktur')
         ->toContain('Panel Redaktur')
         ->toContain('css/filament-admin.css')
-        ->toContain('?v=18')
+        ->toContain('?v=19')
         ->toContain('ks-brand-logo--light')
         ->toContain('ks-brand-logo--dark')
         ->toContain('images/brand/logo-dark.png')
@@ -54,9 +54,10 @@ it('stylesheet admin memakai token light/dark tanpa mematikan warna stat', funct
         ->toContain('.fi-main:has(.fi-resource-edit-record-page)')
         ->toContain('.ks-quick-compose__btn--primary')
         ->toContain('overflow: visible')
-        ->toContain('min-height: max(36rem, 68dvh)')
+        ->toContain('min-height: max(28rem, 55dvh)')
         ->toContain('max-width: 48rem')
-        ->toContain('overflow: visible !important');
+        ->toContain('overflow: visible !important')
+        ->toContain('position: static !important');
 
     expect(preg_match('/\.fi-wi-stats-overview-stat-value\s*\{[^}]*color\s*:/s', $css))->toBe(0)
         ->and(preg_match('/\.fi-wi-stats-overview-stat-description\s*\{[^}]*color\s*:/s', $css))->toBe(0);

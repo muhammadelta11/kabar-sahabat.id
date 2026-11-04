@@ -136,13 +136,11 @@ class PostResource extends Resource
                                 $set('slug', PostSlug::unique($state, $record?->getKey()));
                             }),
                         Forms\Components\TextInput::make('slug')
-                            ->label('Slug')
-                            ->helperText('Otomatis dari judul')
                             ->required()
                             ->maxLength(180)
-                            ->live(onBlur: true)
                             ->unique(ignoreRecord: true)
-                            ->extraFieldWrapperAttributes(['class' => 'ks-writer-meta-field']),
+                            ->hidden()
+                            ->dehydrated(),
                         Forms\Components\FileUpload::make('image_url')
                             ->label('Gambar utama')
                             ->image()
@@ -152,7 +150,6 @@ class PostResource extends Resource
                             ->acceptedFileTypes(['image/jpeg', 'image/png', 'image/webp'])
                             ->maxSize(5120)
                             ->saveUploadedFileUsing(MediaImageProcessor::filamentSaver('posts'))
-                            ->helperText('JPG/PNG/WebP maks. 5MB. Otomatis kompres + watermark.')
                             ->validationMessages([
                                 'max' => 'Gambar terlalu besar (maks. 5MB). Sistem akan mengompres setelah diunggah.',
                                 'mimetypes' => 'Format gambar harus JPG, PNG, atau WebP.',
@@ -167,22 +164,22 @@ class PostResource extends Resource
                             ->columnSpanFull()
                             ->extraFieldWrapperAttributes(['class' => 'ks-writer-body-wrap'])
                             ->toolbarButtons([
-                                'attachFiles',
-                                'blockquote',
                                 'bold',
-                                'bulletList',
+                                'italic',
+                                'underline',
+                                'strike',
+                                'link',
                                 'h2',
                                 'h3',
-                                'italic',
-                                'link',
+                                'bulletList',
                                 'orderedList',
-                                'redo',
-                                'strike',
-                                'underline',
+                                'blockquote',
+                                'attachFiles',
                                 'undo',
+                                'redo',
                             ]),
                     ]),
-                Forms\Components\Section::make('Kategori & tag')
+                Forms\Components\Section::make('Kanal & tag')
                     ->compact()
                     ->schema([
                         Forms\Components\Select::make('categories')
@@ -196,6 +193,7 @@ class PostResource extends Resource
                             ->extraAttributes(['class' => 'ks-kanal-select']),
                         Forms\Components\Select::make('tags')
                             ->label('Tag')
+                            ->helperText('Ketik nama tag lalu buat baru jika belum ada.')
                             ->relationship('tags', 'name')
                             ->multiple()
                             ->preload()
@@ -203,27 +201,19 @@ class PostResource extends Resource
                             ->optionsLimit(50)
                             ->createOptionForm([
                                 Forms\Components\TextInput::make('name')
-                                    ->label('Nama tag')
+                                    ->label('Tag baru')
+                                    ->placeholder('Contoh: PMII, Olahraga')
                                     ->required()
-                                    ->maxLength(80)
-                                    ->live(onBlur: true)
-                                    ->afterStateUpdated(function (Set $set, ?string $state): void {
-                                        if (filled($state)) {
-                                            $set('slug', Str::slug($state));
-                                        }
-                                    }),
-                                Forms\Components\TextInput::make('slug')
-                                    ->required()
-                                    ->maxLength(100)
-                                    ->unique('tags', 'slug'),
+                                    ->maxLength(80),
                             ])
                             ->createOptionUsing(function (array $data): int {
-                                $tag = Tag::query()->create([
-                                    'name' => $data['name'],
-                                    'slug' => $data['slug'] ?: Str::slug($data['name']),
-                                ]);
+                                $name = trim((string) ($data['name'] ?? ''));
+                                $slug = Str::slug($name) ?: Str::lower(Str::random(8));
 
-                                return $tag->getKey();
+                                return Tag::query()->firstOrCreate(
+                                    ['slug' => $slug],
+                                    ['name' => $name],
+                                )->getKey();
                             })
                             ->native(false),
                         Forms\Components\Select::make('status')
@@ -301,33 +291,6 @@ class PostResource extends Resource
                             ->label('No. WA'),
                         Forms\Components\TextInput::make('author_instansi')
                             ->label('Instansi'),
-                    ]),
-                Forms\Components\Section::make('Baca Juga')
-                    ->compact()
-                    ->collapsed()
-                    ->schema([
-                        Forms\Components\Placeholder::make('related_posts_auto')
-                            ->hiddenLabel()
-                            ->content(function (?Post $record): HtmlString {
-                                if (! $record?->exists) {
-                                    return new HtmlString(
-                                        '<p class="text-sm text-gray-600 dark:text-gray-300">Sistem memilih <strong>3 berita terkait</strong> saat disimpan.</p>'
-                                    );
-                                }
-
-                                $items = AutoRelatedPosts::previewFor($record);
-                                if ($items->isEmpty()) {
-                                    return new HtmlString(
-                                        '<p class="text-sm text-amber-700 dark:text-amber-300">Belum ada kandidat. Simpan ulang setelah ada berita lain yang tayang.</p>'
-                                    );
-                                }
-
-                                $lis = $items->map(fn (Post $p) => '<li class="truncate">'.e($p->title).'</li>')->implode('');
-
-                                return new HtmlString(
-                                    '<ol class="list-decimal space-y-1 pl-5 text-sm font-medium text-gray-800 dark:text-gray-100">'.$lis.'</ol>'
-                                );
-                            }),
                     ]),
             ]);
     }

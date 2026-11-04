@@ -68,7 +68,7 @@ it('membuka form tulis berita dengan layout naskah dan publikasi', function () {
 
     actingAs($user);
 
-    Livewire::test(CreatePost::class)
+    $html = Livewire::test(CreatePost::class)
         ->assertSuccessful()
         ->assertSee('Buat berita')
         ->assertSee('Publish')
@@ -76,20 +76,23 @@ it('membuka form tulis berita dengan layout naskah dan publikasi', function () {
         ->assertSee('Batal')
         ->assertSee('Judul berita')
         ->assertDontSee('Buat & buat lainnya')
+        ->assertDontSee('Baca Juga')
         ->assertFormFieldExists('title')
         ->assertFormFieldExists('slug')
         ->assertFormFieldExists('image_url')
         ->assertFormFieldExists('content')
         ->assertFormFieldExists('categories')
         ->assertFormFieldExists('tags')
-        ->assertFormFieldExists('excerpt');
+        ->assertFormFieldExists('excerpt')
+        ->html();
 
-    expect(CreatePost::canCreateAnother())->toBeFalse()
+    expect($html)->not->toContain('>Slug</')
+        ->and(CreatePost::canCreateAnother())->toBeFalse()
         ->and(file_get_contents(app_path('Filament/Resources/PostResource.php')))
         ->toContain("defaultSort('created_at', 'desc')")
         ->and(file_get_contents(public_path('css/filament-admin.css')))
-        ->toContain('ks-writer-title')
-        ->not->toContain('Sembunyikan bottom nav');
+        ->toContain('position: static !important')
+        ->toContain('ks-writer-title');
 });
 
 it('menyimpan berita baru sebagai draft dan mengarahkan ke edit', function () {

@@ -4,6 +4,7 @@ namespace App\Filament\Resources\PostResource\Pages;
 
 use App\Filament\Resources\PostResource;
 use App\Support\AutoRelatedPosts;
+use App\Support\PostSlug;
 use Filament\Actions\Action;
 use Filament\Forms;
 use Filament\Forms\Get;
@@ -33,7 +34,7 @@ class CreatePost extends CreateRecord
 
     public function getSubheading(): ?string
     {
-        return 'Tulis dari judul sampai isi, lalu pilih kanal & tag.';
+        return null;
     }
 
     public function getMaxContentWidth(): MaxWidth|string|null
@@ -114,6 +115,10 @@ class CreatePost extends CreateRecord
     {
         $data['user_id'] ??= auth()->id();
         $data['status'] = $this->saveIntent ?? ($data['status'] ?? 'Draft');
+
+        if (blank($data['slug'] ?? null) && filled($data['title'] ?? null)) {
+            $data['slug'] = PostSlug::unique((string) $data['title']);
+        }
 
         if ($data['status'] === 'Published') {
             $data['published_at'] = $this->publishAt ?? ($data['published_at'] ?? now());
