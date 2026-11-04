@@ -38,7 +38,8 @@ class CreatePost extends CreateRecord
 
     public function getMaxContentWidth(): MaxWidth|string|null
     {
-        return MaxWidth::Full;
+        // Desktop: lebar nyaman (bukan mepet pinggir). HP tetap full lewat CSS mobile.
+        return MaxWidth::FiveExtraLarge;
     }
 
     /**

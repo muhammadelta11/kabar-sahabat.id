@@ -192,6 +192,7 @@ class PostResource extends Resource
                             ->preload()
                             ->searchable()
                             ->native(false)
+                            ->optionsLimit(50)
                             ->extraAttributes(['class' => 'ks-kanal-select']),
                         Forms\Components\Select::make('tags')
                             ->label('Tag')
@@ -199,11 +200,18 @@ class PostResource extends Resource
                             ->multiple()
                             ->preload()
                             ->searchable()
+                            ->optionsLimit(50)
                             ->createOptionForm([
                                 Forms\Components\TextInput::make('name')
                                     ->label('Nama tag')
                                     ->required()
-                                    ->maxLength(80),
+                                    ->maxLength(80)
+                                    ->live(onBlur: true)
+                                    ->afterStateUpdated(function (Set $set, ?string $state): void {
+                                        if (filled($state)) {
+                                            $set('slug', Str::slug($state));
+                                        }
+                                    }),
                                 Forms\Components\TextInput::make('slug')
                                     ->required()
                                     ->maxLength(100)

@@ -38,7 +38,8 @@ class EditPost extends EditRecord
 
     public function getMaxContentWidth(): MaxWidth|string|null
     {
-        return MaxWidth::Full;
+        // Desktop: lebar nyaman (bukan mepet pinggir). HP tetap full lewat CSS mobile.
+        return MaxWidth::FiveExtraLarge;
     }
 
     protected function resolveRecord(int|string $key): Model

@@ -237,7 +237,9 @@
 .fi-dropdown-panel,
 .fi-fo-select-panel,
 ul[role="listbox"] {
-    z-index: 80 !important;
+    z-index: 100 !important;
+    max-height: min(50vh, 18rem) !important;
+    overflow-y: auto !important;
 }
 
 .fi-section-header,
@@ -595,12 +597,47 @@ textarea.fi-input {
 .fi-resource-posts .fi-fo-rich-editor .fi-fo-rich-editor-main,
 .fi-resource-create-record-page.fi-resource-posts .fi-fo-rich-editor .fi-fo-rich-editor-main,
 .fi-resource-edit-record-page.fi-resource-posts .fi-fo-rich-editor .fi-fo-rich-editor-main {
-    min-height: 22rem;
+    min-height: 28rem;
+    height: auto;
 }
 
 .fi-resource-create-record-page.fi-resource-posts .fi-section,
 .fi-resource-edit-record-page.fi-resource-posts .fi-section {
     scroll-margin-top: 5rem;
+}
+
+/* Desktop writer: jangan mepet pinggir — padding + kolom terpusat */
+@media (min-width: 1024px) {
+    .fi-main:has(.fi-resource-create-record-page),
+    .fi-main:has(.fi-resource-edit-record-page),
+    html.ks-writer-mode .fi-main,
+    body.ks-writer-mode .fi-main {
+        padding-left: 1.5rem !important;
+        padding-right: 1.5rem !important;
+    }
+
+    .fi-resource-create-record-page .fi-page-content,
+    .fi-resource-edit-record-page .fi-page-content {
+        max-width: 48rem;
+        margin-inline: auto;
+    }
+
+    .fi-resource-create-record-page .fi-page-header,
+    .fi-resource-edit-record-page .fi-page-header {
+        max-width: 48rem;
+        margin-inline: auto;
+    }
+
+    .fi-resource-create-record-page .fi-form-actions,
+    .fi-resource-edit-record-page .fi-form-actions {
+        max-width: 48rem;
+        margin-inline: auto;
+    }
+
+    .fi-resource-create-record-page .fi-fo-rich-editor .fi-fo-rich-editor-main,
+    .fi-resource-edit-record-page .fi-fo-rich-editor .fi-fo-rich-editor-main {
+        min-height: 28rem;
+    }
 }
 
 /* ===== Mobile bottom nav (app-like) ===== */
@@ -849,7 +886,7 @@ textarea.fi-input {
         gap: 0 !important;
     }
 
-    /* Meta sections: kartu lembut mengambang */
+    /* Meta sections: kartu lembut — overflow visible agar dropdown kanal/tag tidak terpotong */
     .fi-resource-create-record-page .fi-section:not(:has(.ks-writer-title-wrap)),
     .fi-resource-edit-record-page .fi-section:not(:has(.ks-writer-title-wrap)) {
         margin-inline: 0.75rem !important;
@@ -858,9 +895,32 @@ textarea.fi-input {
         border: 1px solid var(--ks-border) !important;
         box-shadow: none !important;
         background: var(--ks-card) !important;
-        overflow: hidden;
+        overflow: visible !important;
         width: auto !important;
         max-width: none !important;
+    }
+
+    .fi-resource-create-record-page .fi-page-content,
+    .fi-resource-edit-record-page .fi-page-content,
+    .fi-resource-create-record-page .fi-section,
+    .fi-resource-edit-record-page .fi-section,
+    .fi-resource-create-record-page .fi-section-content-ctn,
+    .fi-resource-edit-record-page .fi-section-content-ctn,
+    .fi-resource-create-record-page .fi-section-content,
+    .fi-resource-edit-record-page .fi-section-content,
+    .fi-resource-create-record-page .fi-fo-component-ctn,
+    .fi-resource-edit-record-page .fi-fo-component-ctn,
+    .fi-resource-create-record-page .fi-fo-select,
+    .fi-resource-edit-record-page .fi-fo-select {
+        overflow: visible !important;
+    }
+
+    .fi-resource-create-record-page .fi-dropdown-panel,
+    .fi-resource-edit-record-page .fi-dropdown-panel {
+        z-index: 110 !important;
+        max-height: min(45vh, 16rem) !important;
+        overflow-y: auto !important;
+        overscroll-behavior: contain;
     }
 
     .fi-resource-create-record-page .fi-section:not(:has(.ks-writer-title-wrap)) .fi-section-header,
@@ -960,13 +1020,16 @@ textarea.fi-input {
 
     .fi-resource-create-record-page .fi-fo-rich-editor .fi-fo-rich-editor-main,
     .fi-resource-edit-record-page .fi-fo-rich-editor .fi-fo-rich-editor-main {
-        min-height: min(58vh, 28rem) !important;
+        /* Fleksibel: tinggi awal lega, ikut memanjang saat naskah bertambah */
+        min-height: max(36rem, 68dvh) !important;
+        height: auto !important;
         border: 0 !important;
         border-radius: 0 !important;
         background: transparent !important;
         box-shadow: none !important;
         margin: 0 !important;
         width: 100% !important;
+        overflow: visible !important;
     }
 
     .fi-resource-create-record-page .fi-fo-rich-editor .fi-fo-rich-editor-toolbar,
@@ -984,7 +1047,9 @@ textarea.fi-input {
 
     .fi-resource-create-record-page .ProseMirror,
     .fi-resource-edit-record-page .ProseMirror {
-        padding: 1rem 1rem 2.5rem !important;
+        min-height: max(32rem, 60dvh) !important;
+        height: auto !important;
+        padding: 1rem 1rem 3rem !important;
         font-size: 1.08rem !important;
         line-height: 1.75 !important;
         color: var(--ks-ink) !important;
