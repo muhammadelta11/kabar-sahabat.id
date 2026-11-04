@@ -99,7 +99,7 @@ class AdminPanelProvider extends PanelProvider
         FilamentView::registerRenderHook(
             PanelsRenderHook::STYLES_AFTER,
             fn (): string => new HtmlString(
-                '<link rel="stylesheet" href="'.asset('css/filament-admin.css').'?v=12">'
+                '<link rel="stylesheet" href="'.asset('css/filament-admin.css').'?v=14">'
             ),
         );
 
@@ -115,20 +115,10 @@ class AdminPanelProvider extends PanelProvider
                     <style id="ks-writer-critical">
                     @media (max-width:1023px){
                       .fi-main{padding-left:0!important;padding-right:0!important;max-width:100%!important}
-                      .fi-resource-create-record-page>section,
-                      .fi-resource-edit-record-page>section{padding-inline:0!important;gap:.35rem!important}
-                      .fi-resource-create-record-page .fi-section,
-                      .fi-resource-edit-record-page .fi-section{border-radius:0!important;border-left:0!important;border-right:0!important;box-shadow:none!important;margin:0!important}
-                      .fi-resource-create-record-page .fi-section-content-ctn,
-                      .fi-resource-edit-record-page .fi-section-content-ctn,
-                      .fi-resource-create-record-page .fi-section-content,
-                      .fi-resource-edit-record-page .fi-section-content,
-                      .fi-resource-create-record-page .fi-fo-component-ctn,
-                      .fi-resource-edit-record-page .fi-fo-component-ctn{padding:0!important}
-                      .fi-resource-create-record-page .fi-fo-field-wrp-helper-text,
-                      .fi-resource-edit-record-page .fi-fo-field-wrp-helper-text,
-                      .fi-resource-create-record-page .fi-header-subheading,
-                      .fi-resource-edit-record-page .fi-header-subheading{display:none!important}
+                      .ks-mobile-bottom-nav{display:none!important}
+                      .ks-writer-title-wrap .fi-input-wrp,
+                      .ks-writer-excerpt-wrap .fi-input-wrp{background:transparent!important;border:0!important;box-shadow:none!important}
+                      .ks-writer-title{font-size:1.55rem!important;font-weight:800!important;letter-spacing:-.035em!important}
                     }
                     </style>
                     HTML);

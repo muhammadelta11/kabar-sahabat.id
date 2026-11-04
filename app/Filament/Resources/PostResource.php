@@ -115,13 +115,16 @@ class PostResource extends Resource
                     'lg' => 3,
                 ])->schema([
                     Forms\Components\Group::make([
-                        Forms\Components\Section::make('Naskah')
+                        Forms\Components\Section::make()
                             ->schema([
                                 Forms\Components\TextInput::make('title')
-                                    ->label('Judul')
+                                    ->hiddenLabel()
+                                    ->placeholder('Judul berita…')
                                     ->required()
                                     ->maxLength(180)
                                     ->live(onBlur: true)
+                                    ->extraInputAttributes(['class' => 'ks-writer-title'])
+                                    ->extraFieldWrapperAttributes(['class' => 'ks-writer-title-wrap'])
                                     ->afterStateUpdated(function (Set $set, Get $get, ?string $state, Forms\Components\TextInput $component): void {
                                         if (blank($state)) {
                                             return;
@@ -136,18 +139,24 @@ class PostResource extends Resource
                                         $set('slug', PostSlug::unique($state, $record?->getKey()));
                                     }),
                                 Forms\Components\TextInput::make('slug')
+                                    ->label('Slug')
                                     ->required()
                                     ->maxLength(180)
                                     ->live(onBlur: true)
-                                    ->unique(ignoreRecord: true),
+                                    ->unique(ignoreRecord: true)
+                                    ->extraFieldWrapperAttributes(['class' => 'ks-writer-meta-field']),
                                 Forms\Components\Textarea::make('excerpt')
-                                    ->label('Ringkasan')
-                                    ->rows(3)
+                                    ->hiddenLabel()
+                                    ->placeholder('Ringkasan singkat untuk Google & share…')
+                                    ->rows(2)
                                     ->live(onBlur: true)
-                                    ->columnSpanFull(),
-                                Forms\Components\RichEditor::make('content')
-                                    ->label('Isi berita')
                                     ->columnSpanFull()
+                                    ->extraInputAttributes(['class' => 'ks-writer-excerpt'])
+                                    ->extraFieldWrapperAttributes(['class' => 'ks-writer-excerpt-wrap']),
+                                Forms\Components\RichEditor::make('content')
+                                    ->hiddenLabel()
+                                    ->columnSpanFull()
+                                    ->extraFieldWrapperAttributes(['class' => 'ks-writer-body-wrap'])
                                     ->toolbarButtons([
                                         'attachFiles',
                                         'blockquote',
@@ -164,8 +173,9 @@ class PostResource extends Resource
                                         'undo',
                                     ]),
                             ]),
-                        Forms\Components\Section::make('Analisa SEO')
+                        Forms\Components\Section::make('SEO')
                             ->collapsed()
+                            ->compact()
                             ->schema([
                                 Forms\Components\Placeholder::make('seo_analysis')
                                     ->hiddenLabel()
@@ -188,6 +198,7 @@ class PostResource extends Resource
                     Forms\Components\Group::make([
                         Forms\Components\Section::make('Publikasi')
                             ->compact()
+                            ->collapsed()
                             ->schema([
                                 Forms\Components\Select::make('status')
                                     ->options([
@@ -221,7 +232,9 @@ class PostResource extends Resource
                                     ->dehydrated(false)
                                     ->visibleOn('edit'),
                             ]),
-                        Forms\Components\Section::make('Gambar utama')
+                        Forms\Components\Section::make('Gambar')
+                            ->compact()
+                            ->collapsed()
                             ->schema([
                                 Forms\Components\FileUpload::make('image_url')
                                     ->hiddenLabel()
@@ -232,16 +245,17 @@ class PostResource extends Resource
                                     ->acceptedFileTypes(['image/jpeg', 'image/png', 'image/webp'])
                                     ->maxSize(5120)
                                     ->saveUploadedFileUsing(MediaImageProcessor::filamentSaver('posts'))
-                                    ->helperText('JPG/PNG/WebP maks. 5MB. Sistem otomatis kompres + watermark tanpa merusak ketajaman visual.')
+                                    ->helperText('JPG/PNG/WebP maks. 5MB. Otomatis kompres + watermark.')
                                     ->validationMessages([
                                         'max' => 'Gambar terlalu besar (maks. 5MB). Sistem akan mengompres setelah diunggah.',
                                         'mimetypes' => 'Format gambar harus JPG, PNG, atau WebP.',
                                     ]),
                                 Forms\Components\TextInput::make('image_caption')
                                     ->label('Caption')
-                                    ->placeholder('Contoh: Foto: Dok. PMII Walisongo'),
+                                    ->placeholder('Foto: Dok. …'),
                             ]),
-                        Forms\Components\Section::make('Penulis & editor')
+                        Forms\Components\Section::make('Penulis')
+                            ->compact()
                             ->collapsed()
                             ->schema([
                                 Forms\Components\Select::make('user_id')
@@ -251,14 +265,15 @@ class PostResource extends Resource
                                     ->default(fn () => auth()->id())
                                     ->native(false),
                                 Forms\Components\TextInput::make('penulis')
-                                    ->label('Nama penulis (byline)')
-                                    ->placeholder('Contoh: Ahmad Fauzi'),
+                                    ->label('Byline')
+                                    ->placeholder('Nama penulis'),
                                 Forms\Components\TextInput::make('editor')
                                     ->label('Editor')
-                                    ->placeholder('Contoh: Tim Redaksi'),
+                                    ->placeholder('Nama editor'),
                             ]),
                         Forms\Components\Section::make('Kontributor')
                             ->columns(1)
+                            ->compact()
                             ->collapsed()
                             ->visible(fn (Get $get): bool => $get('status') === 'Menunggu Review')
                             ->schema([
@@ -270,7 +285,7 @@ class PostResource extends Resource
                                     ->label('Instansi'),
                             ]),
                         Forms\Components\Section::make('Baca Juga')
-                            ->description('Otomatis dari kanal & berita terbaru.')
+                            ->compact()
                             ->collapsed()
                             ->schema([
                                 Forms\Components\Placeholder::make('related_posts_auto')

@@ -70,8 +70,11 @@ it('membuka form tulis berita dengan layout naskah dan publikasi', function () {
 
     Livewire::test(CreatePost::class)
         ->assertSuccessful()
-        ->assertSee('Tulis Berita')
-        ->assertSee('Simpan')
+        ->assertSee('Tulis')
+        ->assertSee('Publish')
+        ->assertSee('Simpan (Draft)')
+        ->assertSee('Batal')
+        ->assertSee('Judul berita')
         ->assertDontSee('Buat & buat lainnya')
         ->assertDontSee('Ideal 120')
         ->assertFormFieldExists('title')
@@ -80,7 +83,10 @@ it('membuka form tulis berita dengan layout naskah dan publikasi', function () {
         ->assertFormFieldExists('categories')
         ->assertFormFieldExists('image_url');
 
-    expect(CreatePost::canCreateAnother())->toBeFalse();
+    expect(CreatePost::canCreateAnother())->toBeFalse()
+        ->and(file_get_contents(public_path('css/filament-admin.css')))
+        ->toContain('ks-writer-title')
+        ->toContain('.ks-mobile-bottom-nav');
 });
 
 it('menyimpan berita baru sebagai draft dan mengarahkan ke edit', function () {
@@ -96,7 +102,7 @@ it('menyimpan berita baru sebagai draft dan mengarahkan ke edit', function () {
             'content' => '<p>'.str_repeat('Isi artikel untuk uji form create yang responsif. ', 40).'</p>',
             'status' => 'Draft',
         ])
-        ->call('create')
+        ->callAction('saveDraft')
         ->assertHasNoFormErrors()
         ->assertRedirect(PostResource::getUrl('edit', [
             'record' => Post::query()->where('slug', 'naskah-baru-performa')->firstOrFail(),
@@ -107,6 +113,29 @@ it('menyimpan berita baru sebagai draft dan mengarahkan ke edit', function () {
     expect($post)->not->toBeNull()
         ->and($post->user_id)->toBe($user->id)
         ->and($post->status)->toBe('Draft');
+});
+
+it('mem-publish berita baru dari tombol Publish', function () {
+    $user = User::factory()->redaktur()->create();
+
+    actingAs($user);
+
+    Livewire::test(CreatePost::class)
+        ->fillForm([
+            'title' => 'Berita Langsung Tayang',
+            'slug' => 'berita-langsung-tayang',
+            'excerpt' => str_repeat('Ringkasan siap tayang untuk pembaca. ', 3),
+            'content' => '<p>'.str_repeat('Isi artikel siap publish dari mobile writer. ', 40).'</p>',
+            'status' => 'Draft',
+        ])
+        ->callAction('publish')
+        ->assertHasNoFormErrors();
+
+    $post = Post::query()->where('slug', 'berita-langsung-tayang')->first();
+
+    expect($post)->not->toBeNull()
+        ->and($post->status)->toBe('Published')
+        ->and($post->published_at)->not->toBeNull();
 });
 
 it('membuka halaman edit tanpa memuat ulang berita terkait berlebih', function () {
@@ -121,7 +150,10 @@ it('membuka halaman edit tanpa memuat ulang berita terkait berlebih', function (
 
     Livewire::test(EditPost::class, ['record' => $post->getRouteKey()])
         ->assertSuccessful()
-        ->assertSee('Edit Berita')
+        ->assertSee('Edit')
+        ->assertSee('Publish')
+        ->assertSee('Simpan (Draft)')
+        ->assertSee('Batal')
         ->assertFormSet([
             'title' => 'Draft Untuk Diedit',
             'status' => 'Draft',
